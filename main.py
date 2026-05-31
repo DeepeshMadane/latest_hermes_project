@@ -506,12 +506,11 @@ def validate_and_repair(result: dict) -> tuple[dict, list[str]]:
             errors.append(f"Confidence non-zero for null field '{field}' — corrected to 0")
             scores[field] = 0.0
 
-    # 5. Recalculate overall_confidence from non-null fields only
-    non_null_scores = [scores[f] for f in EXTRACTABLE_FIELDS if result.get(f) is not None]
-    if non_null_scores:
-        result["overall_confidence"] = round(sum(non_null_scores) / len(non_null_scores), 3)
-    else:
-        result["overall_confidence"] = 0.0
+    # 5. Recalculate overall_confidence across ALL 8 fields.
+    # Missing fields contribute 0 — so gaps penalize the score properly.
+    # A Rate Request with 5/8 fields found cannot be 100% confident.
+    all_scores = [scores.get(f, 0.0) for f in EXTRACTABLE_FIELDS]
+    result["overall_confidence"] = round(sum(all_scores) / len(all_scores), 3)
 
     # 6. Lists must be lists
     for lf in ["tracking_numbers", "documents_requested", "missing_fields", "human_review_reasons"]:
@@ -772,31 +771,63 @@ def mini_bar(score: float) -> str:
     )
 
 
-def field_grid_html(result: dict) -> str:
+def render_field_rows(result: dict):
+    """
+    Render extracted fields using native Streamlit columns.
+    Avoids unsafe_allow_html CSS grid issues inside st.expander.
+    """
     conf = result.get("confidence_scores", {})
     fields = [
-        ("Customer Name",    "customer_name"),
-        ("Origin",           "origin"),
-        ("Destination",      "destination"),
-        ("Cargo Description","cargo_description"),
-        ("Weight",           "weight"),
-        ("Volume",           "volume"),
-        ("Shipment Mode",    "shipment_mode"),
-        ("Incoterms",        "incoterms"),
+        ("Customer Name",     "customer_name"),
+        ("Origin",            "origin"),
+        ("Destination",       "destination"),
+        ("Cargo Description", "cargo_description"),
+        ("Weight",            "weight"),
+        ("Volume",            "volume"),
+        ("Shipment Mode",     "shipment_mode"),
+        ("Incoterms",         "incoterms"),
     ]
-    items = ""
-    for label, key in fields:
-        val = result.get(key)
-        score = conf.get(key, 0.0) or 0.0
-        val_html = f'<div class="field-val">{val}</div>' if val else '<div class="field-empty">Not found</div>'
-        bar_html = mini_bar(score) if val else ""
-        items += f"""
-        <div class="field-item">
-            <div class="field-label">{label}</div>
-            {val_html}
-            {bar_html}
-        </div>"""
-    return f'<div class="field-grid">{items}</div>'
+
+    # Render in 2-column grid using st.columns
+    pairs = [fields[i:i+2] for i in range(0, len(fields), 2)]
+    for pair in pairs:
+        cols = st.columns(2)
+        for col, (label, key) in zip(cols, pair):
+            with col:
+                val   = result.get(key)
+                score = float(conf.get(key, 0.0) or 0.0)
+                pct   = int(score * 100)
+                bar_color = (
+                    "#22c55e" if score >= 0.75
+                    else "#f59e0b" if score >= 0.5
+                    else "#ef4444"
+                )
+                # Label
+                st.markdown(
+                    f'<div style="font-size:10.5px;font-weight:700;text-transform:uppercase;'
+                    f'letter-spacing:0.8px;color:#9ca3af;margin-bottom:2px">{label}</div>',
+                    unsafe_allow_html=True
+                )
+                if val:
+                    # Value
+                    st.markdown(
+                        f'<div style="font-size:14px;font-weight:500;color:#111827;margin-bottom:4px">{val}</div>',
+                        unsafe_allow_html=True
+                    )
+                    # Confidence bar
+                    st.markdown(
+                        f'<div style="background:#e9ecef;border-radius:4px;height:5px;margin-bottom:2px">'
+                        f'<div style="width:{pct}%;height:5px;border-radius:4px;background:{bar_color}"></div>'
+                        f'</div>'
+                        f'<div style="font-size:10px;color:#9ca3af">{pct}% confidence</div>',
+                        unsafe_allow_html=True
+                    )
+                else:
+                    st.markdown(
+                        '<div style="font-size:13px;color:#d1d5db;font-style:italic">Not found</div>',
+                        unsafe_allow_html=True
+                    )
+                st.markdown('<hr style="border:none;border-top:1px solid #f3f4f6;margin:10px 0 12px 0">', unsafe_allow_html=True)
 
 
 def preproc_stats_html(stats: dict) -> str:
@@ -1245,7 +1276,7 @@ with col_out:
 
         # ── Extracted fields grid ──
         with st.expander("📋 Extracted Shipment Fields", expanded=True):
-            st.markdown(field_grid_html(result), unsafe_allow_html=True)
+            render_field_rows(result)
 
         # ── Raw JSON ──
         with st.expander("🔧 Raw JSON Output"):
