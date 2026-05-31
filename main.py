@@ -1109,31 +1109,32 @@ def run_extraction(raw_email: str, api_key: str, threshold: float):
         "timestamp": datetime.now().strftime("%H:%M:%S"),
         "preview": raw_email[:80] + "…",
     })
-    # ── LOGGING ──────────────────────────────────────────────────────────
+   # ── LOGGING ──────────────────────────────────────────────────────────
     import hashlib
+    from supabase import create_client
+    
     log_entry = {
         "timestamp":          datetime.utcnow().isoformat(),
         "email_hash":         hashlib.md5(raw_email.encode()).hexdigest(),
         "classification":     result.get("classification"),
-        "overall_confidence": result.get("overall_confidence"),
+        "overall_confidence": round(result.get("overall_confidence", 0), 3),
         "human_review":       result.get("human_review_required"),
-        "human_review_reasons": result.get("human_review_reasons", []),
-        "missing_fields":     result.get("missing_fields", []),
+        "missing_fields":     ", ".join(result.get("missing_fields", [])),
         "is_email_chain":     result.get("is_email_chain"),
         "multiple_shipments": result.get("multiple_shipments_detected"),
-        "validation_errors":  val_errors,
-        "preproc_stats":      preproc["stats"],
-        "fields_extracted":   {
-            k: (result.get(k) is not None)
-            for k in ["customer_name","origin","destination","cargo_description",
-                      "weight","volume","shipment_mode","incoterms"]
-        },
+        "validation_errors":  len(val_errors),
+        "chain_depth":        preproc["stats"].get("chain_depth", 1),
+        "noise_removed":      preproc["stats"].get("noise_items_removed", 0),
     }
+    
     try:
-        with open("hermes_logs.jsonl", "a") as f:
-            f.write(json.dumps(log_entry) + "\n")
+        sb = create_client(
+            st.secrets["SUPABASE_URL"],
+            st.secrets["SUPABASE_KEY"]
+        )
+        sb.table("extraction_logs").insert(log_entry).execute()
     except Exception:
-        pass  # never crash the app because of logging
+        pass  # never crash app due to logging
     # ── END LOGGING ───────────────────────────────────────────────────────
 
 
