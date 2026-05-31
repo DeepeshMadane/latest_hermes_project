@@ -244,6 +244,119 @@ st.markdown("""
 
     /* ── Section divider ── */
     .section-sep { border: none; border-top: 1px solid #f1f3f5; margin: 12px 0; }
+
+    /* ══════════════════════════════════════════
+       PROCESSING LOG STYLES
+    ══════════════════════════════════════════ */
+
+    /* Log container */
+    .log-container {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 12px;
+        background: #0d1117;
+        border: 1px solid #30363d;
+        border-radius: 10px;
+        padding: 14px 16px;
+        max-height: 460px;
+        overflow-y: auto;
+        line-height: 1.75;
+    }
+
+    /* Individual log entry */
+    .log-entry {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 3px 0;
+        border-bottom: 1px solid #161b22;
+    }
+    .log-entry:last-child { border-bottom: none; }
+
+    /* Timestamp */
+    .log-ts {
+        color: #484f58;
+        min-width: 88px;
+        font-size: 11px;
+        padding-top: 1px;
+        flex-shrink: 0;
+    }
+
+    /* Step icon */
+    .log-icon { min-width: 18px; text-align: center; flex-shrink: 0; }
+
+    /* Status dot */
+    .log-dot-ok      { color: #3fb950; }  /* green  */
+    .log-dot-warn    { color: #d29922; }  /* amber  */
+    .log-dot-err     { color: #f85149; }  /* red    */
+    .log-dot-info    { color: #58a6ff; }  /* blue   */
+    .log-dot-running { color: #a5d6ff; }  /* light blue – in-progress */
+
+    /* Step name (phase header) */
+    .log-phase {
+        color: #c9d1d9;
+        font-weight: 600;
+    }
+    .log-detail {
+        color: #8b949e;
+    }
+    .log-value {
+        color: #79c0ff;
+    }
+    .log-duration {
+        color: #484f58;
+        margin-left: 6px;
+        font-size: 10.5px;
+    }
+
+    /* File/email chip inside the log */
+    .log-file-chip {
+        display: inline-block;
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 4px;
+        padding: 1px 7px;
+        font-size: 10.5px;
+        color: #8b949e;
+        margin-right: 4px;
+        font-family: 'IBM Plex Mono', monospace;
+    }
+
+    /* Phase separator inside log */
+    .log-phase-sep {
+        border: none;
+        border-top: 1px solid #21262d;
+        margin: 6px 0;
+    }
+
+    /* Summary bar at bottom of each run */
+    .log-summary {
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 6px;
+        padding: 7px 12px;
+        margin-top: 8px;
+        display: flex;
+        gap: 18px;
+        font-size: 11px;
+        color: #8b949e;
+    }
+    .log-summary-ok   { color: #3fb950; }
+    .log-summary-warn { color: #d29922; }
+    .log-summary-err  { color: #f85149; }
+
+    /* Run header */
+    .log-run-header {
+        color: #388bfd;
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        padding: 4px 0 2px;
+    }
+
+    /* Scrollbar inside log */
+    .log-container::-webkit-scrollbar { width: 4px; }
+    .log-container::-webkit-scrollbar-track { background: transparent; }
+    .log-container::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -260,9 +373,169 @@ for key, default in {
     "access_token": None,
     "preproc_stats": {},
     "validation_errors": [],
+    # ── NEW: processing log ──────────────────────────────
+    "proc_log": [],           # list of all run logs (newest first)
+    "active_log_run": None,   # the run currently being built (list of step dicts)
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  PROCESSING LOG HELPERS
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _log_step(status: str, phase: str, detail: str = "", value: str = "", duration_ms: int = None):
+    """
+    Append one step to the active log run.
+
+    status : "ok" | "warn" | "err" | "info" | "running"
+    phase  : short step name, e.g. "HTML strip"
+    detail : secondary description
+    value  : highlighted value (e.g. a number, filename)
+    duration_ms : elapsed ms for this step
+    """
+    if st.session_state.active_log_run is None:
+        st.session_state.active_log_run = []
+
+    icon_map = {
+        "ok":      "✓",
+        "warn":    "⚠",
+        "err":     "✗",
+        "info":    "·",
+        "running": "⟳",
+    }
+    st.session_state.active_log_run.append({
+        "ts":       datetime.now().strftime("%H:%M:%S.%f")[:-3],
+        "status":   status,
+        "icon":     icon_map.get(status, "·"),
+        "phase":    phase,
+        "detail":   detail,
+        "value":    value,
+        "dur_ms":   duration_ms,
+    })
+
+
+def _start_log_run(email_raw: str, source_label: str):
+    """Begin a new log run and record metadata."""
+    email_hash = hashlib.md5(email_raw.encode()).hexdigest()[:10]
+    char_count = len(email_raw)
+    st.session_state.active_log_run = []
+    _log_step("info", "Run started",
+              detail=f"source: {source_label}",
+              value=f"hash={email_hash}  chars={char_count:,}")
+    return email_hash
+
+
+def _finish_log_run(email_hash: str, classification: str, confidence: float,
+                    needs_review: bool, val_error_count: int, total_ms: int):
+    """Close the active run, attach summary, push to proc_log."""
+    run_status = "err" if val_error_count > 3 else ("warn" if needs_review else "ok")
+    _log_step(run_status, "Run complete",
+              detail=f"class={classification}  conf={confidence:.0%}  review={'YES' if needs_review else 'no'}",
+              value=f"total {total_ms} ms")
+
+    run_record = {
+        "run_id":       email_hash,
+        "started_at":   st.session_state.active_log_run[0]["ts"] if st.session_state.active_log_run else "?",
+        "steps":        list(st.session_state.active_log_run),
+        "classification": classification,
+        "confidence":   confidence,
+        "needs_review": needs_review,
+        "val_errors":   val_error_count,
+        "total_ms":     total_ms,
+    }
+    # Insert newest first
+    st.session_state.proc_log.insert(0, run_record)
+    # Cap history at 50 runs
+    st.session_state.proc_log = st.session_state.proc_log[:50]
+    st.session_state.active_log_run = None
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  LOG RENDER HELPER
+# ══════════════════════════════════════════════════════════════════════════════
+
+def render_log_entry_html(step: dict) -> str:
+    status   = step["status"]
+    css_cls  = f"log-dot-{status}"
+    icon_str = step["icon"]
+    ts_str   = step["ts"]
+    phase    = step["phase"]
+    detail   = step["detail"]
+    value    = step["value"]
+    dur      = f'<span class="log-duration">{step["dur_ms"]} ms</span>' if step.get("dur_ms") else ""
+
+    detail_html = f' <span class="log-detail">{detail}</span>' if detail else ""
+    value_html  = f' <span class="log-value">{value}</span>' if value else ""
+
+    return (
+        f'<div class="log-entry">'
+        f'  <span class="log-ts">{ts_str}</span>'
+        f'  <span class="log-icon {css_cls}">{icon_str}</span>'
+        f'  <span><span class="log-phase">{phase}</span>{detail_html}{value_html}{dur}</span>'
+        f'</div>'
+    )
+
+
+def render_proc_log():
+    """Render the full processing log panel."""
+    proc_log = st.session_state.proc_log
+    if not proc_log:
+        st.caption("No runs yet. Extract an email to see step-by-step logs.")
+        return
+
+    # Controls row
+    c1, c2 = st.columns([4, 1])
+    with c1:
+        run_labels = [
+            f"Run {i+1} · {r['started_at']} · {r['classification']} · {r['confidence']:.0%} conf"
+            + (" ⚠ review" if r["needs_review"] else "")
+            for i, r in enumerate(proc_log)
+        ]
+        selected_idx = st.selectbox("Select run", range(len(proc_log)), format_func=lambda i: run_labels[i], label_visibility="collapsed")
+    with c2:
+        if st.button("🗑 Clear Logs", use_container_width=True):
+            st.session_state.proc_log = []
+            st.rerun()
+
+    run = proc_log[selected_idx]
+
+    # Summary row
+    summary_ok  = sum(1 for s in run["steps"] if s["status"] == "ok")
+    summary_warn= sum(1 for s in run["steps"] if s["status"] == "warn")
+    summary_err = sum(1 for s in run["steps"] if s["status"] == "err")
+
+    summary_html = (
+        f'<div class="log-summary">'
+        f'  <span>Run <strong style="color:#c9d1d9">{run["run_id"]}</strong></span>'
+        f'  <span class="log-summary-ok">✓ {summary_ok} ok</span>'
+        f'  <span class="log-summary-warn">⚠ {summary_warn} warn</span>'
+        f'  <span class="log-summary-err">✗ {summary_err} err</span>'
+        f'  <span>⏱ {run["total_ms"]} ms total</span>'
+        f'  <span>📋 {len(run["steps"])} steps</span>'
+        f'</div>'
+    )
+
+    # Build the step rows HTML
+    rows_html = ""
+    for step in run["steps"]:
+        rows_html += render_log_entry_html(step)
+
+    st.markdown(
+        f'{summary_html}'
+        f'<div class="log-container">{rows_html}</div>',
+        unsafe_allow_html=True
+    )
+
+    # Raw JSON download of this run's log
+    st.download_button(
+        "⬇️ Download this run's log (JSON)",
+        data=json.dumps(run, indent=2),
+        file_name=f"hermes_log_{run['run_id']}_{run['started_at'].replace(':','')}.json",
+        mime="application/json",
+        use_container_width=True,
+    )
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -270,7 +543,6 @@ for key, default in {
 # ══════════════════════════════════════════════════════════════════════════════
 
 def strip_html(text: str) -> str:
-    """Remove HTML tags and decode common entities."""
     text = re.sub(r"<style[^>]*>.*?</style>", "", text, flags=re.DOTALL | re.IGNORECASE)
     text = re.sub(r"<script[^>]*>.*?</script>", "", text, flags=re.DOTALL | re.IGNORECASE)
     text = re.sub(r"<[^>]+>", " ", text)
@@ -280,17 +552,13 @@ def strip_html(text: str) -> str:
 
 
 def split_email_chain(raw: str) -> list[dict]:
-    """
-    Split a raw email thread into ordered segments (newest first).
-    Returns list of dicts: {position, is_latest, body, char_count}
-    """
     delimiters = [
         r"-{3,}\s*Original Message\s*-{3,}",
         r"-{3,}\s*Forwarded Message\s*-{3,}",
         r"_{3,}\s*\n",
-        r"On\s+.{5,80}wrote:\s*\n",          # Gmail/Apple "On Mon, John wrote:"
-        r"From:\s*.+\nSent:\s*.+\nTo:\s*.+",  # Outlook quote header block
-        r">{2,}\s*From:",                       # Deep-quoted ">> From:"
+        r"On\s+.{5,80}wrote:\s*\n",
+        r"From:\s*.+\nSent:\s*.+\nTo:\s*.+",
+        r">{2,}\s*From:",
     ]
     pattern = "|".join(delimiters)
     parts = re.split(pattern, raw, flags=re.IGNORECASE | re.DOTALL)
@@ -300,12 +568,7 @@ def split_email_chain(raw: str) -> list[dict]:
         part = part.strip()
         if len(part) < 30:
             continue
-        segments.append({
-            "position": i,
-            "is_latest": i == 0,
-            "body": part,
-            "char_count": len(part),
-        })
+        segments.append({"position": i, "is_latest": i == 0, "body": part, "char_count": len(part)})
 
     if not segments:
         segments = [{"position": 0, "is_latest": True, "body": raw, "char_count": len(raw)}]
@@ -323,33 +586,31 @@ NOISE_PATTERNS = [
     r"GSTIN\s*[:\-]?\s*[\w\d]+",
     r"CIN\s*[:\-]?\s*[A-Z\d]+",
     r"PAN\s*[:\-]?\s*[A-Z\d]+",
-    r"\b[A-Z]{2}\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}Z[A-Z\d]\b",  # GSTIN regex
+    r"\b[A-Z]{2}\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}Z[A-Z\d]\b",
     r"www\.[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}",
     r"https?://[^\s]+",
-    r"\b[\w\.\-]+@[\w\.\-]+\.[a-z]{2,}\b",  # emails in noise (NOT from/to headers)
+    r"\b[\w\.\-]+@[\w\.\-]+\.[a-z]{2,}\b",
     r"(?i)this (email|message) (and|including) any attachments.*",
     r"(?i)confidentiality notice.*",
     r"(?i)disclaimer.*",
     r"(?i)this message was sent by.*",
     r"(?i)scanned by.*antivirus.*",
     r"(?i)virus-free.*www\.",
-    r"\[\s*cid:[^\]]+\]",                   # inline image references
+    r"\[\s*cid:[^\]]+\]",
 ]
 
 
 def strip_signature(text: str) -> tuple[str, bool]:
-    """Remove email signature block. Returns (cleaned_text, was_stripped)."""
     original_len = len(text)
     for pattern in SIGNATURE_PATTERNS:
         match = re.search(pattern, text, flags=re.DOTALL)
-        if match and match.start() > len(text) * 0.3:  # only strip if >30% in
+        if match and match.start() > len(text) * 0.3:
             text = text[:match.start()].strip()
             break
     return text, len(text) < original_len
 
 
 def strip_noise(text: str) -> tuple[str, int]:
-    """Remove GSTIN, URLs, disclaimers, gateway noise. Returns (cleaned, count_removed)."""
     count = 0
     for pattern in NOISE_PATTERNS:
         matches = re.findall(pattern, text, flags=re.IGNORECASE | re.DOTALL)
@@ -366,14 +627,6 @@ def normalize_whitespace(text: str) -> str:
 
 
 def preprocess_email(raw: str) -> dict:
-    """
-    Full preprocessing pipeline.
-    Returns dict with:
-      - segments: list of chain segments (newest first)
-      - llm_input: the structured string to send to LLM
-      - stats: what was removed/detected
-      - is_chain: bool
-    """
     stats = {
         "html_stripped": False,
         "signature_stripped": False,
@@ -383,29 +636,57 @@ def preprocess_email(raw: str) -> dict:
         "total_chars_after": 0,
     }
 
-    # 1. Strip HTML if present
+    t0 = time.time()
+
+    # 1. Strip HTML
     if bool(re.search(r"<[a-zA-Z]", raw)):
         raw = strip_html(raw)
         stats["html_stripped"] = True
+        _log_step("ok", "HTML strip", detail="removed tags + entities",
+                  value=f"{stats['total_chars_before'] - len(raw):,} chars removed",
+                  duration_ms=int((time.time() - t0) * 1000))
+    else:
+        _log_step("info", "HTML strip", detail="skipped — plain text input")
 
     # 2. Split chain
+    t1 = time.time()
     segments = split_email_chain(raw)
     stats["chain_depth"] = len(segments)
     is_chain = len(segments) > 1
+    _log_step(
+        "ok" if is_chain else "info",
+        "Chain split",
+        detail=f"{'email chain detected' if is_chain else 'single email'}",
+        value=f"{len(segments)} segment(s)",
+        duration_ms=int((time.time() - t1) * 1000),
+    )
 
-    # 3. For each segment: strip signature + noise
+    # 3. Per-segment: strip signature + noise
     cleaned_segments = []
     for seg in segments:
+        t2 = time.time()
         body = seg["body"]
         body, sig_stripped = strip_signature(body)
-        body, noise_count = strip_noise(body)
+        body, noise_count  = strip_noise(body)
         body = normalize_whitespace(body)
+        seg_label = "latest" if seg["is_latest"] else f"older[{seg['position']}]"
         if seg["is_latest"]:
             stats["signature_stripped"] = sig_stripped
             stats["noise_items_removed"] += noise_count
+
+        _log_step(
+            "ok" if (sig_stripped or noise_count > 0) else "info",
+            f"Clean seg:{seg_label}",
+            detail=(
+                f"sig={'stripped' if sig_stripped else 'none'}  "
+                f"noise={noise_count} items"
+            ),
+            duration_ms=int((time.time() - t2) * 1000),
+        )
         cleaned_segments.append({**seg, "body": body, "cleaned_char_count": len(body)})
 
-    # 4. Build structured LLM input
+    # 4. Build LLM input
+    t3 = time.time()
     if is_chain:
         parts = []
         for seg in cleaned_segments:
@@ -416,6 +697,14 @@ def preprocess_email(raw: str) -> dict:
         llm_input = cleaned_segments[0]["body"] if cleaned_segments else raw
 
     stats["total_chars_after"] = len(llm_input)
+    reduction_pct = round((stats["total_chars_before"] - stats["total_chars_after"]) / max(stats["total_chars_before"], 1) * 100)
+    _log_step(
+        "ok",
+        "LLM input built",
+        detail=f"chars: {stats['total_chars_before']:,} → {stats['total_chars_after']:,}",
+        value=f"-{reduction_pct}% tokens",
+        duration_ms=int((time.time() - t3) * 1000),
+    )
 
     return {
         "segments": cleaned_segments,
@@ -450,43 +739,28 @@ REQUIRED_KEYS = {
 
 
 def validate_and_repair(result: dict) -> tuple[dict, list[str]]:
-    """
-    Validate LLM output. Repair what can be fixed automatically.
-    Flag issues that need human review.
-    Returns (repaired_result, list_of_errors).
-    """
     errors = []
-
-    # 1. Schema completeness — fill missing keys with safe defaults
     list_defaults = {"tracking_numbers", "documents_requested", "missing_fields", "human_review_reasons"}
     bool_defaults = {"human_review_required", "multiple_shipments_detected", "is_email_chain", "has_attachments_mentioned"}
     for key in REQUIRED_KEYS:
         if key not in result:
-            if key in list_defaults:
-                result[key] = []
-            elif key in bool_defaults:
-                result[key] = False
-            elif key == "confidence_scores":
-                result[key] = {}
-            elif key == "overall_confidence":
-                result[key] = 0.0
-            else:
-                result[key] = None
+            if key in list_defaults:        result[key] = []
+            elif key in bool_defaults:      result[key] = False
+            elif key == "confidence_scores":result[key] = {}
+            elif key == "overall_confidence":result[key] = 0.0
+            else:                           result[key] = None
             errors.append(f"Missing key auto-filled: {key}")
 
-    # 2. Classification guard
     if result.get("classification") not in VALID_CLASSIFICATIONS:
         errors.append(f"Invalid classification '{result.get('classification')}' — reset to General Enquiry")
         result["classification"] = "General Enquiry"
         result["human_review_required"] = True
         result.setdefault("human_review_reasons", []).append("Invalid classification returned by model")
 
-    # 3. Shipment mode guard
     if result.get("shipment_mode") not in VALID_MODES:
         errors.append(f"Invalid shipment_mode '{result.get('shipment_mode')}' — reset to null")
         result["shipment_mode"] = None
 
-    # 4. Confidence score bounds + null consistency
     scores = result.get("confidence_scores", {})
     if not isinstance(scores, dict):
         scores = {}
@@ -495,35 +769,27 @@ def validate_and_repair(result: dict) -> tuple[dict, list[str]]:
 
     for field in EXTRACTABLE_FIELDS:
         score = scores.get(field, 0.0)
-        # Clamp to [0, 1]
         if not isinstance(score, (int, float)):
             scores[field] = 0.0
             errors.append(f"Non-numeric confidence for {field} — reset to 0")
         else:
             scores[field] = round(max(0.0, min(1.0, float(score))), 3)
-        # Null field must have confidence 0
         if result.get(field) is None and scores.get(field, 0) > 0:
             errors.append(f"Confidence non-zero for null field '{field}' — corrected to 0")
             scores[field] = 0.0
 
-    # 5. Recalculate overall_confidence across ALL 8 fields.
-    # Missing fields contribute 0 — so gaps penalize the score properly.
-    # A Rate Request with 5/8 fields found cannot be 100% confident.
     all_scores = [scores.get(f, 0.0) for f in EXTRACTABLE_FIELDS]
     result["overall_confidence"] = round(sum(all_scores) / len(all_scores), 3)
 
-    # 6. Lists must be lists
     for lf in ["tracking_numbers", "documents_requested", "missing_fields", "human_review_reasons"]:
         if not isinstance(result.get(lf), list):
             result[lf] = []
             errors.append(f"Fixed non-list field: {lf}")
 
-    # 7. Booleans
     for bf in ["human_review_required", "multiple_shipments_detected", "is_email_chain", "has_attachments_mentioned"]:
         if not isinstance(result.get(bf), bool):
             result[bf] = bool(result.get(bf))
 
-    # 8. Escalate if errors found
     if errors:
         result["human_review_required"] = True
         reason = "Validation errors detected in model output"
@@ -593,10 +859,7 @@ Return this exact JSON schema (no markdown, no preamble, no trailing text):
 
 def _do_llm_call(llm_input: str, api_key: str) -> dict:
     import requests as req
-
-    # Injection defense: wrap content in clear delimiters
     safe_input = f"<EMAIL_CONTENT_START>\n{llm_input}\n<EMAIL_CONTENT_END>"
-
     payload = {
         "model": "llama-3.3-70b-versatile",
         "max_tokens": 2048,
@@ -614,36 +877,56 @@ def _do_llm_call(llm_input: str, api_key: str) -> dict:
     )
     resp.raise_for_status()
     data = resp.json()
-
     raw = data["choices"][0]["message"]["content"].strip()
     raw = re.sub(r"^```json\s*|^```\s*|```$", "", raw, flags=re.MULTILINE).strip()
-
-    # Sometimes model wraps in extra text before/after JSON
     json_match = re.search(r"\{.*\}", raw, re.DOTALL)
     if json_match:
         raw = json_match.group(0)
-
     return json.loads(raw)
 
 
 def call_llm_with_retry(llm_input: str, api_key: str, max_retries: int = 3) -> tuple[dict, list[str]]:
-    """Call LLM with exponential backoff retry. Returns (result, validation_errors)."""
     last_error = None
     for attempt in range(max_retries):
+        t_llm = time.time()
         try:
+            _log_step("running", f"LLM call", detail=f"attempt {attempt+1}/{max_retries}",
+                      value="llama-3.3-70b-versatile")
             raw_result = _do_llm_call(llm_input, api_key)
+            llm_ms = int((time.time() - t_llm) * 1000)
+            _log_step("ok", "LLM response", detail="JSON received and parsed",
+                      duration_ms=llm_ms)
+
+            t_val = time.time()
             validated, errors = validate_and_repair(raw_result)
+            val_ms = int((time.time() - t_val) * 1000)
+
+            if errors:
+                _log_step("warn", "Validation",
+                          detail=f"{len(errors)} correction(s) applied",
+                          value=errors[0][:60] if errors else "",
+                          duration_ms=val_ms)
+            else:
+                _log_step("ok", "Validation", detail="all fields passed",
+                          duration_ms=val_ms)
+
             return validated, errors
+
         except json.JSONDecodeError as e:
             last_error = f"JSON parse error (attempt {attempt+1}): {e}"
+            _log_step("err", f"JSON parse", detail=str(e)[:80],
+                      duration_ms=int((time.time() - t_llm) * 1000))
             if attempt < max_retries - 1:
                 time.sleep(2 ** attempt)
         except Exception as e:
             last_error = f"API error (attempt {attempt+1}): {e}"
+            _log_step("err", f"API error", detail=str(e)[:80],
+                      duration_ms=int((time.time() - t_llm) * 1000))
             if attempt < max_retries - 1:
+                _log_step("info", "Retry backoff", detail=f"waiting {2**attempt}s before retry {attempt+2}")
                 time.sleep(2 ** attempt)
 
-    # All retries failed — return safe degraded response
+    _log_step("err", "All retries failed", detail=last_error[:100] if last_error else "unknown")
     degraded = {
         "classification": "General Enquiry",
         "customer_name": None, "origin": None, "destination": None,
@@ -737,14 +1020,10 @@ def badge_html(classification: str) -> str:
 
 
 def confidence_ring_svg(score: float, size: int = 56) -> str:
-    """SVG donut ring showing confidence percentage."""
     pct = round(score * 100)
-    if score >= 0.75:
-        color = "#22c55e"
-    elif score >= 0.5:
-        color = "#f59e0b"
-    else:
-        color = "#ef4444"
+    if score >= 0.75: color = "#22c55e"
+    elif score >= 0.5: color = "#f59e0b"
+    else: color = "#ef4444"
     r = 22
     circ = 2 * 3.14159 * r
     dash = circ * score
@@ -772,10 +1051,6 @@ def mini_bar(score: float) -> str:
 
 
 def render_field_rows(result: dict):
-    """
-    Render extracted fields using native Streamlit columns.
-    Avoids unsafe_allow_html CSS grid issues inside st.expander.
-    """
     conf = result.get("confidence_scores", {})
     fields = [
         ("Customer Name",     "customer_name"),
@@ -787,8 +1062,6 @@ def render_field_rows(result: dict):
         ("Shipment Mode",     "shipment_mode"),
         ("Incoterms",         "incoterms"),
     ]
-
-    # Render in 2-column grid using st.columns
     pairs = [fields[i:i+2] for i in range(0, len(fields), 2)]
     for pair in pairs:
         cols = st.columns(2)
@@ -797,37 +1070,26 @@ def render_field_rows(result: dict):
                 val   = result.get(key)
                 score = float(conf.get(key, 0.0) or 0.0)
                 pct   = int(score * 100)
-                bar_color = (
-                    "#22c55e" if score >= 0.75
-                    else "#f59e0b" if score >= 0.5
-                    else "#ef4444"
-                )
-                # Label
+                bar_color = "#22c55e" if score >= 0.75 else "#f59e0b" if score >= 0.5 else "#ef4444"
                 st.markdown(
                     f'<div style="font-size:10.5px;font-weight:700;text-transform:uppercase;'
                     f'letter-spacing:0.8px;color:#9ca3af;margin-bottom:2px">{label}</div>',
-                    unsafe_allow_html=True
-                )
+                    unsafe_allow_html=True)
                 if val:
-                    # Value
                     st.markdown(
                         f'<div style="font-size:14px;font-weight:500;color:#111827;margin-bottom:4px">{val}</div>',
-                        unsafe_allow_html=True
-                    )
-                    # Confidence bar
+                        unsafe_allow_html=True)
                     st.markdown(
                         f'<div style="background:#e9ecef;border-radius:4px;height:5px;margin-bottom:2px">'
                         f'<div style="width:{pct}%;height:5px;border-radius:4px;background:{bar_color}"></div>'
                         f'</div>'
                         f'<div style="font-size:10px;color:#9ca3af">{pct}% confidence</div>',
-                        unsafe_allow_html=True
-                    )
+                        unsafe_allow_html=True)
                 else:
-                    st.markdown(
-                        '<div style="font-size:13px;color:#d1d5db;font-style:italic">Not found</div>',
-                        unsafe_allow_html=True
-                    )
-                st.markdown('<hr style="border:none;border-top:1px solid #f3f4f6;margin:10px 0 12px 0">', unsafe_allow_html=True)
+                    st.markdown('<div style="font-size:13px;color:#d1d5db;font-style:italic">Not found</div>',
+                                unsafe_allow_html=True)
+                st.markdown('<hr style="border:none;border-top:1px solid #f3f4f6;margin:10px 0 12px 0">',
+                            unsafe_allow_html=True)
 
 
 def preproc_stats_html(stats: dict) -> str:
@@ -1081,38 +1343,46 @@ col_in, col_out = st.columns([1, 1], gap="large")
 
 
 # ── Helper: run full pipeline ─────────────────────────────────────────────────
-def run_extraction(raw_email: str, api_key: str, threshold: float):
-    # Preprocess
+def run_extraction(raw_email: str, api_key: str, threshold: float, source_label: str = "manual"):
+    t_total = time.time()
+
+    # ── Begin log run ──────────────────────────────────────────────────
+    email_hash = _start_log_run(raw_email, source_label)
+
+    # ── PREPROCESS ────────────────────────────────────────────────────
+    _log_step("info", "── Preprocessing ──")
     preproc = preprocess_email(raw_email)
     st.session_state.preprocessed_text = preproc["llm_input"]
     st.session_state.chain_segments    = preproc["segments"]
     st.session_state.preproc_stats     = preproc["stats"]
 
-    # LLM + validation
+    # ── LLM + VALIDATION ──────────────────────────────────────────────
+    _log_step("info", "── LLM Extraction ──")
     result, val_errors = call_llm_with_retry(preproc["llm_input"], api_key)
 
-    # Override is_email_chain from our own detection (more reliable)
+    # Override is_email_chain from our own detection
     result["is_email_chain"] = preproc["is_chain"]
 
-    # Threshold check
+    # ── THRESHOLD CHECK ────────────────────────────────────────────────
+    t_thresh = time.time()
     if result.get("overall_confidence", 1.0) < threshold:
         result["human_review_required"] = True
         reason = "Low overall confidence (below threshold)"
         if reason not in result.get("human_review_reasons", []):
             result.setdefault("human_review_reasons", []).append(reason)
+        _log_step("warn", "Threshold check",
+                  detail=f"confidence {result['overall_confidence']:.0%} < threshold {threshold:.0%}",
+                  value="→ flagged for review",
+                  duration_ms=int((time.time() - t_thresh) * 1000))
+    else:
+        _log_step("ok", "Threshold check",
+                  detail=f"confidence {result.get('overall_confidence', 0):.0%} ≥ {threshold:.0%}",
+                  value="→ auto-processable",
+                  duration_ms=int((time.time() - t_thresh) * 1000))
 
-    st.session_state.result = result
-    st.session_state.email_text = raw_email
-    st.session_state.validation_errors = val_errors
-    st.session_state.history.append({
-        **result,
-        "timestamp": datetime.now().strftime("%H:%M:%S"),
-        "preview": raw_email[:80] + "…",
-    })
-   # ── LOGGING ──────────────────────────────────────────────────────────
-    import hashlib
-    from supabase import create_client
-    
+    # ── SUPABASE LOGGING ───────────────────────────────────────────────
+    _log_step("info", "── Persistence ──")
+    t_sb = time.time()
     log_entry = {
         "timestamp":          datetime.utcnow().isoformat(),
         "email_hash":         hashlib.md5(raw_email.encode()).hexdigest(),
@@ -1126,16 +1396,44 @@ def run_extraction(raw_email: str, api_key: str, threshold: float):
         "chain_depth":        preproc["stats"].get("chain_depth", 1),
         "noise_removed":      preproc["stats"].get("noise_items_removed", 0),
     }
-    
     try:
-        sb = create_client(
-            st.secrets["SUPABASE_URL"],
-            st.secrets["SUPABASE_KEY"]
-        )
+        from supabase import create_client
+        sb = create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
         sb.table("extraction_logs").insert(log_entry).execute()
-    except Exception:
-        pass  # never crash app due to logging
-    # ── END LOGGING ───────────────────────────────────────────────────────
+        _log_step("ok", "Supabase write",
+                  detail="extraction_logs row inserted",
+                  value=f"hash={email_hash}",
+                  duration_ms=int((time.time() - t_sb) * 1000))
+    except KeyError:
+        _log_step("warn", "Supabase write",
+                  detail="SUPABASE_URL/KEY not in secrets — skipped",
+                  duration_ms=int((time.time() - t_sb) * 1000))
+    except Exception as e:
+        _log_step("err", "Supabase write",
+                  detail=str(e)[:80],
+                  duration_ms=int((time.time() - t_sb) * 1000))
+
+    # ── SESSION HISTORY ────────────────────────────────────────────────
+    st.session_state.result = result
+    st.session_state.email_text = raw_email
+    st.session_state.validation_errors = val_errors
+    st.session_state.history.append({
+        **result,
+        "timestamp": datetime.now().strftime("%H:%M:%S"),
+        "preview": raw_email[:80] + "…",
+    })
+    _log_step("ok", "Session history", detail="record appended to session")
+
+    # ── CLOSE LOG RUN ──────────────────────────────────────────────────
+    total_ms = int((time.time() - t_total) * 1000)
+    _finish_log_run(
+        email_hash=email_hash,
+        classification=result.get("classification", "?"),
+        confidence=result.get("overall_confidence", 0),
+        needs_review=result.get("human_review_required", False),
+        val_error_count=len(val_errors),
+        total_ms=total_ms,
+    )
 
 
 # ── INPUT PANEL ───────────────────────────────────────────────────────────────
@@ -1152,7 +1450,7 @@ with col_in:
             elif email_input.strip():
                 raw = f"Subject: {subject_input}\n\n{email_input}" if subject_input else email_input
                 with st.spinner("Preprocessing + extracting…"):
-                    run_extraction(raw, grok_api_key, confidence_threshold)
+                    run_extraction(raw, grok_api_key, confidence_threshold, source_label="paste")
             else:
                 st.warning("Please paste an email first.")
 
@@ -1166,7 +1464,8 @@ with col_in:
                 st.warning("GROK_API_KEY not set in Streamlit secrets.")
             else:
                 with st.spinner("Preprocessing + extracting…"):
-                    run_extraction(sample_text, grok_api_key, confidence_threshold)
+                    run_extraction(sample_text, grok_api_key, confidence_threshold,
+                                   source_label=f"sample:{selected[:40]}")
 
     elif source == "Outlook (Microsoft 365)":
         outlook_emails = st.session_state.get("outlook_emails", [])
@@ -1187,7 +1486,6 @@ with col_in:
                 f"From: {email_obj.get('from',{}).get('emailAddress',{}).get('address','')}\n"
                 f"Received: {email_obj.get('receivedDateTime','')}\n\n{body}"
             )
-            # Show preview (HTML will be stripped in preprocessing)
             preview = re.sub(r"<[^>]+>", " ", body)
             preview = re.sub(r"\s+", " ", preview).strip()
             st.markdown('<div class="email-box">' + preview[:500].replace("\n","<br>") + "…</div>", unsafe_allow_html=True)
@@ -1197,7 +1495,8 @@ with col_in:
                     st.warning("GROK_API_KEY not set in Streamlit secrets.")
                 else:
                     with st.spinner("Preprocessing + extracting…"):
-                        run_extraction(full_email, grok_api_key, confidence_threshold)
+                        run_extraction(full_email, grok_api_key, confidence_threshold,
+                                       source_label=f"outlook:{email_obj.get('subject','')[:30]}")
 
     # ── Preprocessing details panel ───────────────────────────────────────────
     if show_preproc and st.session_state.preproc_stats:
@@ -1237,7 +1536,6 @@ with col_out:
     else:
         oc = result.get("overall_confidence", 0)
 
-        # ── Top strip: badge + ring + review status ──
         top_left, top_right = st.columns([3, 1])
         with top_left:
             st.markdown(badge_html(result.get("classification", "General Enquiry")), unsafe_allow_html=True)
@@ -1246,70 +1544,58 @@ with col_out:
             st.markdown(
                 f'<div style="text-align:center">{confidence_ring_svg(oc)}'
                 f'<div style="font-size:10px;color:#9ca3af;margin-top:2px;text-align:center">Confidence</div></div>',
-                unsafe_allow_html=True
-            )
+                unsafe_allow_html=True)
 
         st.markdown("")
 
-        # ── Review banner ──
         if result.get("human_review_required"):
             reasons_html = "".join(f"<li>{r}</li>" for r in result.get("human_review_reasons", []))
             st.markdown(
                 f'<div class="review-alert">⚠️ <strong>Human Review Required</strong>'
                 f'<ul style="margin:6px 0 0 0;padding-left:18px;line-height:1.8">{reasons_html}</ul></div>',
-                unsafe_allow_html=True
-            )
+                unsafe_allow_html=True)
         else:
             st.markdown(
                 '<div class="review-ok">✅ <strong>Auto-processable</strong> — confidence sufficient for automated handling.</div>',
-                unsafe_allow_html=True
-            )
+                unsafe_allow_html=True)
 
         st.markdown("")
 
-        # ── Missing fields ──
         missing = result.get("missing_fields", [])
         if missing:
             pills = "".join(f'<span class="pill-missing">⚠ {f}</span>' for f in missing)
             st.markdown(
                 f'<div style="margin-bottom:14px"><div class="card-title" style="margin-bottom:6px">Missing Critical Fields</div>{pills}</div>',
-                unsafe_allow_html=True
-            )
+                unsafe_allow_html=True)
 
-        # ── Flags row ──
         flags = []
-        if result.get("is_email_chain"):            flags.append("📧 Email Chain")
-        if result.get("multiple_shipments_detected"):flags.append("📦 Multiple Shipments")
-        if result.get("has_attachments_mentioned"):  flags.append("📎 Attachments Mentioned")
+        if result.get("is_email_chain"):             flags.append("📧 Email Chain")
+        if result.get("multiple_shipments_detected"): flags.append("📦 Multiple Shipments")
+        if result.get("has_attachments_mentioned"):   flags.append("📎 Attachments Mentioned")
         if flags:
             chips = "".join(f'<span class="flag-chip">{f}</span>' for f in flags)
             st.markdown(f'<div style="margin-bottom:10px">{chips}</div>', unsafe_allow_html=True)
             if result.get("attachment_details"):
                 st.caption(f"Attachment: {result['attachment_details']}")
 
-        # ── Tracking numbers ──
         tracking = result.get("tracking_numbers", [])
         if tracking:
             st.markdown('<div class="card-title">Tracking Numbers</div>', unsafe_allow_html=True)
             for t in tracking:
                 st.code(t, language=None)
 
-        # ── Documents requested ──
         docs = result.get("documents_requested", [])
         if docs:
             st.markdown('<div class="card-title">Documents Requested</div>', unsafe_allow_html=True)
             st.markdown("  ·  ".join(f"**{d}**" for d in docs))
             st.markdown("")
 
-        # ── Extracted fields grid ──
         with st.expander("📋 Extracted Shipment Fields", expanded=True):
             render_field_rows(result)
 
-        # ── Raw JSON ──
         with st.expander("🔧 Raw JSON Output"):
             st.json(result)
 
-        # ── Download ──
         st.download_button(
             "⬇️ Download JSON",
             data=json.dumps(result, indent=2),
@@ -1317,6 +1603,17 @@ with col_out:
             mime="application/json",
             use_container_width=True,
         )
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  PROCESSING LOG PANEL  ← NEW
+# ══════════════════════════════════════════════════════════════════════════════
+
+st.markdown("---")
+st.markdown("### 🖥️ Processing Log")
+st.caption("Step-by-step trace of every pipeline run — preprocessing, LLM calls, validation, and persistence.")
+
+render_proc_log()
 
 
 # ══════════════════════════════════════════════════════════════════════════════
