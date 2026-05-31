@@ -21,339 +21,128 @@ st.markdown("""
     html, body, .stApp { font-family: 'IBM Plex Sans', sans-serif; }
     .main { background: #f0f2f6; }
 
-    /* ── Cards ── */
     .card {
-        background: white;
-        border-radius: 10px;
-        padding: 18px 22px;
-        margin-bottom: 14px;
-        border: 1px solid #e2e6ea;
+        background: white; border-radius: 10px; padding: 18px 22px;
+        margin-bottom: 14px; border: 1px solid #e2e6ea;
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
     .card-title {
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: #8492a6;
-        margin-bottom: 10px;
+        font-size: 11px; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 1px; color: #8492a6; margin-bottom: 10px;
     }
-
-    /* ── Classification badges ── */
     .badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 5px 14px;
-        border-radius: 6px;
-        font-size: 13px;
-        font-weight: 600;
-        letter-spacing: 0.2px;
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 5px 14px; border-radius: 6px; font-size: 13px;
+        font-weight: 600; letter-spacing: 0.2px;
     }
     .badge-rate      { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
     .badge-tracking  { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
     .badge-docs      { background: #fef9c3; color: #a16207; border: 1px solid #fde68a; }
     .badge-complaint { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
     .badge-general   { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
-
-    /* ── Confidence ring (SVG-based, done in Python) ── */
-    .conf-ring-wrap { display:flex; align-items:center; gap:14px; }
-
-    /* ── Confidence bar ── */
     .conf-bar-bg {
-        background: #e9ecef;
-        border-radius: 4px;
-        height: 6px;
-        width: 100%;
-        margin-top: 5px;
-        overflow: hidden;
+        background: #e9ecef; border-radius: 4px; height: 6px;
+        width: 100%; margin-top: 5px; overflow: hidden;
     }
     .conf-bar-fill { height: 6px; border-radius: 4px; }
-
-    /* ── Review alert ── */
     .review-alert {
-        background: #fffbeb;
-        border: 1px solid #fcd34d;
-        border-left: 4px solid #f59e0b;
-        border-radius: 8px;
-        padding: 12px 16px;
-        font-size: 13.5px;
-        color: #78350f;
+        background: #fffbeb; border: 1px solid #fcd34d;
+        border-left: 4px solid #f59e0b; border-radius: 8px;
+        padding: 12px 16px; font-size: 13.5px; color: #78350f;
     }
     .review-ok {
-        background: #f0fdf4;
-        border: 1px solid #86efac;
-        border-left: 4px solid #22c55e;
-        border-radius: 8px;
-        padding: 12px 16px;
-        font-size: 13.5px;
-        color: #14532d;
+        background: #f0fdf4; border: 1px solid #86efac;
+        border-left: 4px solid #22c55e; border-radius: 8px;
+        padding: 12px 16px; font-size: 13.5px; color: #14532d;
     }
-
-    /* ── Missing field pill ── */
     .pill-missing {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        background: #fee2e2;
-        color: #b91c1c;
-        border: 1px solid #fecaca;
-        border-radius: 6px;
-        padding: 4px 10px;
-        font-size: 12px;
-        font-weight: 500;
-        margin: 3px;
+        display: inline-flex; align-items: center; gap: 4px;
+        background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca;
+        border-radius: 6px; padding: 4px 10px; font-size: 12px;
+        font-weight: 500; margin: 3px;
     }
-
-    /* ── Field rows ── */
-    .field-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 14px 24px;
-    }
-    .field-item { border-bottom: 1px solid #f1f3f5; padding-bottom: 10px; }
-    .field-label {
-        font-size: 10.5px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        color: #9ca3af;
-        margin-bottom: 3px;
-    }
-    .field-val { font-size: 14px; color: #111827; font-weight: 500; }
-    .field-empty { font-size: 13px; color: #d1d5db; font-style: italic; }
-
-    /* ── Confidence inline ── */
-    .conf-inline {
-        font-size: 11px;
-        color: #9ca3af;
-        margin-top: 3px;
-        display:flex;
-        align-items:center;
-        gap:6px;
-    }
-
-    /* ── Email preview box ── */
     .email-box {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 14px 18px;
-        font-size: 13px;
-        font-family: 'IBM Plex Mono', monospace;
-        color: #374151;
-        max-height: 220px;
-        overflow-y: auto;
-        white-space: pre-wrap;
-        line-height: 1.65;
+        background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+        padding: 14px 18px; font-size: 13px; font-family: 'IBM Plex Mono', monospace;
+        color: #374151; max-height: 220px; overflow-y: auto;
+        white-space: pre-wrap; line-height: 1.65;
     }
-
-    /* ── Chain segment ── */
     .chain-latest {
-        background: #eff6ff;
-        border-left: 3px solid #3b82f6;
-        border-radius: 0 6px 6px 0;
-        padding: 10px 14px;
-        margin-bottom: 10px;
-        font-size: 12.5px;
+        background: #eff6ff; border-left: 3px solid #3b82f6;
+        border-radius: 0 6px 6px 0; padding: 10px 14px;
+        margin-bottom: 10px; font-size: 12.5px;
     }
     .chain-older {
-        background: #f9fafb;
-        border-left: 3px solid #d1d5db;
-        border-radius: 0 6px 6px 0;
-        padding: 10px 14px;
-        margin-bottom: 6px;
-        font-size: 12px;
-        color: #6b7280;
+        background: #f9fafb; border-left: 3px solid #d1d5db;
+        border-radius: 0 6px 6px 0; padding: 10px 14px;
+        margin-bottom: 6px; font-size: 12px; color: #6b7280;
     }
-    .chain-label {
-        font-size: 10px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 4px;
-    }
+    .chain-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
     .chain-label-latest { color: #2563eb; }
     .chain-label-older  { color: #9ca3af; }
-
-    /* ── Flag chips ── */
     .flag-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        background: #f3f4f6;
-        border: 1px solid #e5e7eb;
-        border-radius: 20px;
-        padding: 3px 10px;
-        font-size: 12px;
-        color: #374151;
-        margin-right: 6px;
-        font-weight: 500;
+        display: inline-flex; align-items: center; gap: 4px;
+        background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 20px;
+        padding: 3px 10px; font-size: 12px; color: #374151;
+        margin-right: 6px; font-weight: 500;
     }
-
-    /* ── Sidebar ── */
     section[data-testid="stSidebar"] { background: #0f172a !important; }
     section[data-testid="stSidebar"] * { color: #cbd5e1 !important; }
     section[data-testid="stSidebar"] h2,
     section[data-testid="stSidebar"] h3 { color: #f1f5f9 !important; }
     section[data-testid="stSidebar"] hr { border-color: #1e293b !important; }
     section[data-testid="stSidebar"] .stButton button {
-        background: #1e3a5f !important;
-        border: 1px solid #2563eb !important;
-        color: #93c5fd !important;
+        background: #1e3a5f !important; border: 1px solid #2563eb !important; color: #93c5fd !important;
     }
-
-    /* ── Preprocessing badge ── */
+    /* FIX #3: sidebar warning for Outlook auto-connect failure */
+    .outlook-warn {
+        background: #451a03; border: 1px solid #92400e; border-radius: 6px;
+        padding: 8px 12px; font-size: 12px; color: #fcd34d; margin-top: 8px;
+    }
     .preproc-tag {
-        display: inline-block;
-        background: #ecfdf5;
-        color: #065f46;
-        border: 1px solid #a7f3d0;
-        border-radius: 4px;
-        padding: 2px 8px;
-        font-size: 11px;
-        font-weight: 600;
-        margin: 2px;
+        display: inline-block; background: #ecfdf5; color: #065f46;
+        border: 1px solid #a7f3d0; border-radius: 4px; padding: 2px 8px;
+        font-size: 11px; font-weight: 600; margin: 2px;
     }
-    .preproc-tag-warn {
-        background: #fff7ed;
-        color: #9a3412;
-        border-color: #fed7aa;
-    }
-
-    /* ── Empty state ── */
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-        color: #9ca3af;
-    }
+    .preproc-tag-warn { background: #fff7ed; color: #9a3412; border-color: #fed7aa; }
+    .empty-state { text-align: center; padding: 60px 20px; color: #9ca3af; }
     .empty-state-icon { font-size: 52px; margin-bottom: 12px; }
     .empty-state-title { font-size: 16px; font-weight: 600; color: #6b7280; margin-bottom: 6px; }
     .empty-state-sub { font-size: 13px; }
-
-    /* ── Validation warning ── */
     .val-warn {
-        background: #fdf2f8;
-        border: 1px solid #f0abfc;
-        border-radius: 6px;
-        padding: 8px 12px;
-        font-size: 12px;
-        color: #701a75;
-        margin-top: 8px;
+        background: #fdf2f8; border: 1px solid #f0abfc; border-radius: 6px;
+        padding: 8px 12px; font-size: 12px; color: #701a75; margin-top: 8px;
     }
-
-    /* ── Section divider ── */
     .section-sep { border: none; border-top: 1px solid #f1f3f5; margin: 12px 0; }
-
-    /* ══════════════════════════════════════════
-       PROCESSING LOG STYLES
-    ══════════════════════════════════════════ */
-
-    /* Log container */
     .log-container {
-        font-family: 'IBM Plex Mono', monospace;
-        font-size: 12px;
-        background: #0d1117;
-        border: 1px solid #30363d;
-        border-radius: 10px;
-        padding: 14px 16px;
-        max-height: 460px;
-        overflow-y: auto;
-        line-height: 1.75;
+        font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+        background: #0d1117; border: 1px solid #30363d; border-radius: 10px;
+        padding: 14px 16px; max-height: 460px; overflow-y: auto; line-height: 1.75;
     }
-
-    /* Individual log entry */
     .log-entry {
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        padding: 3px 0;
-        border-bottom: 1px solid #161b22;
+        display: flex; align-items: flex-start; gap: 10px;
+        padding: 3px 0; border-bottom: 1px solid #161b22;
     }
     .log-entry:last-child { border-bottom: none; }
-
-    /* Timestamp */
-    .log-ts {
-        color: #484f58;
-        min-width: 88px;
-        font-size: 11px;
-        padding-top: 1px;
-        flex-shrink: 0;
-    }
-
-    /* Step icon */
+    .log-ts { color: #484f58; min-width: 88px; font-size: 11px; padding-top: 1px; flex-shrink: 0; }
     .log-icon { min-width: 18px; text-align: center; flex-shrink: 0; }
-
-    /* Status dot */
-    .log-dot-ok      { color: #3fb950; }  /* green  */
-    .log-dot-warn    { color: #d29922; }  /* amber  */
-    .log-dot-err     { color: #f85149; }  /* red    */
-    .log-dot-info    { color: #58a6ff; }  /* blue   */
-    .log-dot-running { color: #a5d6ff; }  /* light blue – in-progress */
-
-    /* Step name (phase header) */
-    .log-phase {
-        color: #c9d1d9;
-        font-weight: 600;
-    }
-    .log-detail {
-        color: #8b949e;
-    }
-    .log-value {
-        color: #79c0ff;
-    }
-    .log-duration {
-        color: #484f58;
-        margin-left: 6px;
-        font-size: 10.5px;
-    }
-
-    /* File/email chip inside the log */
-    .log-file-chip {
-        display: inline-block;
-        background: #161b22;
-        border: 1px solid #30363d;
-        border-radius: 4px;
-        padding: 1px 7px;
-        font-size: 10.5px;
-        color: #8b949e;
-        margin-right: 4px;
-        font-family: 'IBM Plex Mono', monospace;
-    }
-
-    /* Phase separator inside log */
-    .log-phase-sep {
-        border: none;
-        border-top: 1px solid #21262d;
-        margin: 6px 0;
-    }
-
-    /* Summary bar at bottom of each run */
+    .log-dot-ok      { color: #3fb950; }
+    .log-dot-warn    { color: #d29922; }
+    .log-dot-err     { color: #f85149; }
+    .log-dot-info    { color: #58a6ff; }
+    .log-dot-running { color: #a5d6ff; }
+    .log-phase   { color: #c9d1d9; font-weight: 600; }
+    .log-detail  { color: #8b949e; }
+    .log-value   { color: #79c0ff; }
+    .log-duration { color: #484f58; margin-left: 6px; font-size: 10.5px; }
     .log-summary {
-        background: #161b22;
-        border: 1px solid #30363d;
-        border-radius: 6px;
-        padding: 7px 12px;
-        margin-top: 8px;
-        display: flex;
-        gap: 18px;
-        font-size: 11px;
-        color: #8b949e;
+        background: #161b22; border: 1px solid #30363d; border-radius: 6px;
+        padding: 7px 12px; margin-top: 8px; display: flex; gap: 18px;
+        font-size: 11px; color: #8b949e;
     }
     .log-summary-ok   { color: #3fb950; }
     .log-summary-warn { color: #d29922; }
     .log-summary-err  { color: #f85149; }
-
-    /* Run header */
-    .log-run-header {
-        color: #388bfd;
-        font-size: 11.5px;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-        padding: 4px 0 2px;
-    }
-
-    /* Scrollbar inside log */
     .log-container::-webkit-scrollbar { width: 4px; }
     .log-container::-webkit-scrollbar-track { background: transparent; }
     .log-container::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
@@ -370,12 +159,13 @@ for key, default in {
     "chain_segments": [],
     "history": [],
     "outlook_connected": False,
+    "outlook_connect_failed": False,   # FIX #3
     "access_token": None,
     "preproc_stats": {},
     "validation_errors": [],
-    # ── NEW: processing log ──────────────────────────────
-    "proc_log": [],           # list of all run logs (newest first)
-    "active_log_run": None,   # the run currently being built (list of step dicts)
+    "outlook_email_ids": set(),        # FIX #8: deduplication set
+    "proc_log": [],
+    "active_log_run": None,
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
@@ -386,149 +176,113 @@ for key, default in {
 # ══════════════════════════════════════════════════════════════════════════════
 
 def _log_step(status: str, phase: str, detail: str = "", value: str = "", duration_ms: int = None):
-    """
-    Append one step to the active log run.
-
-    status : "ok" | "warn" | "err" | "info" | "running"
-    phase  : short step name, e.g. "HTML strip"
-    detail : secondary description
-    value  : highlighted value (e.g. a number, filename)
-    duration_ms : elapsed ms for this step
-    """
     if st.session_state.active_log_run is None:
         st.session_state.active_log_run = []
-
-    icon_map = {
-        "ok":      "✓",
-        "warn":    "⚠",
-        "err":     "✗",
-        "info":    "·",
-        "running": "⟳",
-    }
+    icon_map = {"ok": "✓", "warn": "⚠", "err": "✗", "info": "·", "running": "⟳"}
     st.session_state.active_log_run.append({
-        "ts":       datetime.now().strftime("%H:%M:%S.%f")[:-3],
-        "status":   status,
-        "icon":     icon_map.get(status, "·"),
-        "phase":    phase,
-        "detail":   detail,
-        "value":    value,
-        "dur_ms":   duration_ms,
+        "ts":     datetime.now().strftime("%H:%M:%S.%f")[:-3],
+        "status": status,
+        "icon":   icon_map.get(status, "·"),
+        "phase":  phase,
+        "detail": detail,
+        "value":  value,
+        "dur_ms": duration_ms,
     })
 
 
 def _start_log_run(email_raw: str, source_label: str):
-    """Begin a new log run and record metadata."""
     email_hash = hashlib.md5(email_raw.encode()).hexdigest()[:10]
     char_count = len(email_raw)
     st.session_state.active_log_run = []
+    # FIX #2: show source_label prominently in the run header
     _log_step("info", "Run started",
               detail=f"source: {source_label}",
               value=f"hash={email_hash}  chars={char_count:,}")
     return email_hash
 
 
-def _finish_log_run(email_hash: str, classification: str, confidence: float,
-                    needs_review: bool, val_error_count: int, total_ms: int):
-    """Close the active run, attach summary, push to proc_log."""
+def _finish_log_run(email_hash: str, source_label: str, classification: str,
+                    confidence: float, needs_review: bool,
+                    val_error_count: int, total_ms: int):
     run_status = "err" if val_error_count > 3 else ("warn" if needs_review else "ok")
     _log_step(run_status, "Run complete",
               detail=f"class={classification}  conf={confidence:.0%}  review={'YES' if needs_review else 'no'}",
               value=f"total {total_ms} ms")
 
     run_record = {
-        "run_id":       email_hash,
-        "started_at":   st.session_state.active_log_run[0]["ts"] if st.session_state.active_log_run else "?",
-        "steps":        list(st.session_state.active_log_run),
+        "run_id":         email_hash,
+        "source_label":   source_label,          # FIX #2: stored for dropdown
+        "started_at":     st.session_state.active_log_run[0]["ts"] if st.session_state.active_log_run else "?",
+        "steps":          list(st.session_state.active_log_run),
         "classification": classification,
-        "confidence":   confidence,
-        "needs_review": needs_review,
-        "val_errors":   val_error_count,
-        "total_ms":     total_ms,
+        "confidence":     confidence,
+        "needs_review":   needs_review,
+        "val_errors":     val_error_count,
+        "total_ms":       total_ms,
     }
-    # Insert newest first
     st.session_state.proc_log.insert(0, run_record)
-    # Cap history at 50 runs
     st.session_state.proc_log = st.session_state.proc_log[:50]
     st.session_state.active_log_run = None
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  LOG RENDER HELPER
+#  LOG RENDER
 # ══════════════════════════════════════════════════════════════════════════════
 
 def render_log_entry_html(step: dict) -> str:
-    status   = step["status"]
-    css_cls  = f"log-dot-{status}"
-    icon_str = step["icon"]
-    ts_str   = step["ts"]
-    phase    = step["phase"]
-    detail   = step["detail"]
-    value    = step["value"]
-    dur      = f'<span class="log-duration">{step["dur_ms"]} ms</span>' if step.get("dur_ms") else ""
-
-    detail_html = f' <span class="log-detail">{detail}</span>' if detail else ""
-    value_html  = f' <span class="log-value">{value}</span>' if value else ""
-
+    status  = step["status"]
+    css_cls = f"log-dot-{status}"
+    dur     = f'<span class="log-duration">{step["dur_ms"]} ms</span>' if step.get("dur_ms") else ""
+    detail_html = f' <span class="log-detail">{step["detail"]}</span>' if step["detail"] else ""
+    value_html  = f' <span class="log-value">{step["value"]}</span>'   if step["value"]  else ""
     return (
         f'<div class="log-entry">'
-        f'  <span class="log-ts">{ts_str}</span>'
-        f'  <span class="log-icon {css_cls}">{icon_str}</span>'
-        f'  <span><span class="log-phase">{phase}</span>{detail_html}{value_html}{dur}</span>'
+        f'  <span class="log-ts">{step["ts"]}</span>'
+        f'  <span class="log-icon {css_cls}">{step["icon"]}</span>'
+        f'  <span><span class="log-phase">{step["phase"]}</span>{detail_html}{value_html}{dur}</span>'
         f'</div>'
     )
 
 
 def render_proc_log():
-    """Render the full processing log panel."""
     proc_log = st.session_state.proc_log
     if not proc_log:
         st.caption("No runs yet. Extract an email to see step-by-step logs.")
         return
 
-    # Controls row
     c1, c2 = st.columns([4, 1])
     with c1:
+        # FIX #2: run dropdown now shows source_label prominently
         run_labels = [
-            f"Run {i+1} · {r['started_at']} · {r['classification']} · {r['confidence']:.0%} conf"
+            f"Run {i+1} · {r['source_label']} · {r['classification']} · {r['confidence']:.0%}"
             + (" ⚠ review" if r["needs_review"] else "")
             for i, r in enumerate(proc_log)
         ]
-        selected_idx = st.selectbox("Select run", range(len(proc_log)), format_func=lambda i: run_labels[i], label_visibility="collapsed")
+        selected_idx = st.selectbox("Select run", range(len(proc_log)),
+                                    format_func=lambda i: run_labels[i],
+                                    label_visibility="collapsed")
     with c2:
         if st.button("🗑 Clear Logs", use_container_width=True):
             st.session_state.proc_log = []
             st.rerun()
 
     run = proc_log[selected_idx]
-
-    # Summary row
-    summary_ok  = sum(1 for s in run["steps"] if s["status"] == "ok")
-    summary_warn= sum(1 for s in run["steps"] if s["status"] == "warn")
-    summary_err = sum(1 for s in run["steps"] if s["status"] == "err")
+    summary_ok   = sum(1 for s in run["steps"] if s["status"] == "ok")
+    summary_warn = sum(1 for s in run["steps"] if s["status"] == "warn")
+    summary_err  = sum(1 for s in run["steps"] if s["status"] == "err")
 
     summary_html = (
         f'<div class="log-summary">'
         f'  <span>Run <strong style="color:#c9d1d9">{run["run_id"]}</strong></span>'
+        f'  <span style="color:#8b949e">src: {run.get("source_label","?")}</span>'
         f'  <span class="log-summary-ok">✓ {summary_ok} ok</span>'
         f'  <span class="log-summary-warn">⚠ {summary_warn} warn</span>'
         f'  <span class="log-summary-err">✗ {summary_err} err</span>'
         f'  <span>⏱ {run["total_ms"]} ms total</span>'
-        f'  <span>📋 {len(run["steps"])} steps</span>'
         f'</div>'
     )
-
-    # Build the step rows HTML
-    rows_html = ""
-    for step in run["steps"]:
-        rows_html += render_log_entry_html(step)
-
-    st.markdown(
-        f'{summary_html}'
-        f'<div class="log-container">{rows_html}</div>',
-        unsafe_allow_html=True
-    )
-
-    # Raw JSON download of this run's log
+    rows_html = "".join(render_log_entry_html(s) for s in run["steps"])
+    st.markdown(f'{summary_html}<div class="log-container">{rows_html}</div>', unsafe_allow_html=True)
     st.download_button(
         "⬇️ Download this run's log (JSON)",
         data=json.dumps(run, indent=2),
@@ -551,7 +305,7 @@ def strip_html(text: str) -> str:
     return text.strip()
 
 
-def split_email_chain(raw: str) -> list[dict]:
+def split_email_chain(raw: str) -> list:
     delimiters = [
         r"-{3,}\s*Original Message\s*-{3,}",
         r"-{3,}\s*Forwarded Message\s*-{3,}",
@@ -562,17 +316,14 @@ def split_email_chain(raw: str) -> list[dict]:
     ]
     pattern = "|".join(delimiters)
     parts = re.split(pattern, raw, flags=re.IGNORECASE | re.DOTALL)
-
     segments = []
     for i, part in enumerate(parts):
         part = part.strip()
         if len(part) < 30:
             continue
         segments.append({"position": i, "is_latest": i == 0, "body": part, "char_count": len(part)})
-
     if not segments:
         segments = [{"position": 0, "is_latest": True, "body": raw, "char_count": len(raw)}]
-
     return segments
 
 
@@ -581,7 +332,6 @@ SIGNATURE_PATTERNS = [
     r"(?i)(^|\n)--\s*\n.*",
     r"(?i)(^|\n)_{3,}.*",
 ]
-
 NOISE_PATTERNS = [
     r"GSTIN\s*[:\-]?\s*[\w\d]+",
     r"CIN\s*[:\-]?\s*[A-Z\d]+",
@@ -600,7 +350,7 @@ NOISE_PATTERNS = [
 ]
 
 
-def strip_signature(text: str) -> tuple[str, bool]:
+def strip_signature(text: str) -> tuple:
     original_len = len(text)
     for pattern in SIGNATURE_PATTERNS:
         match = re.search(pattern, text, flags=re.DOTALL)
@@ -610,7 +360,7 @@ def strip_signature(text: str) -> tuple[str, bool]:
     return text, len(text) < original_len
 
 
-def strip_noise(text: str) -> tuple[str, int]:
+def strip_noise(text: str) -> tuple:
     count = 0
     for pattern in NOISE_PATTERNS:
         matches = re.findall(pattern, text, flags=re.IGNORECASE | re.DOTALL)
@@ -635,10 +385,7 @@ def preprocess_email(raw: str) -> dict:
         "total_chars_before": len(raw),
         "total_chars_after": 0,
     }
-
     t0 = time.time()
-
-    # 1. Strip HTML
     if bool(re.search(r"<[a-zA-Z]", raw)):
         raw = strip_html(raw)
         stats["html_stripped"] = True
@@ -648,20 +395,15 @@ def preprocess_email(raw: str) -> dict:
     else:
         _log_step("info", "HTML strip", detail="skipped — plain text input")
 
-    # 2. Split chain
     t1 = time.time()
     segments = split_email_chain(raw)
     stats["chain_depth"] = len(segments)
     is_chain = len(segments) > 1
-    _log_step(
-        "ok" if is_chain else "info",
-        "Chain split",
-        detail=f"{'email chain detected' if is_chain else 'single email'}",
-        value=f"{len(segments)} segment(s)",
-        duration_ms=int((time.time() - t1) * 1000),
-    )
+    _log_step("ok" if is_chain else "info", "Chain split",
+              detail=f"{'email chain detected' if is_chain else 'single email'}",
+              value=f"{len(segments)} segment(s)",
+              duration_ms=int((time.time() - t1) * 1000))
 
-    # 3. Per-segment: strip signature + noise
     cleaned_segments = []
     for seg in segments:
         t2 = time.time()
@@ -673,19 +415,12 @@ def preprocess_email(raw: str) -> dict:
         if seg["is_latest"]:
             stats["signature_stripped"] = sig_stripped
             stats["noise_items_removed"] += noise_count
-
-        _log_step(
-            "ok" if (sig_stripped or noise_count > 0) else "info",
-            f"Clean seg:{seg_label}",
-            detail=(
-                f"sig={'stripped' if sig_stripped else 'none'}  "
-                f"noise={noise_count} items"
-            ),
-            duration_ms=int((time.time() - t2) * 1000),
-        )
+        _log_step("ok" if (sig_stripped or noise_count > 0) else "info",
+                  f"Clean seg:{seg_label}",
+                  detail=f"sig={'stripped' if sig_stripped else 'none'}  noise={noise_count} items",
+                  duration_ms=int((time.time() - t2) * 1000))
         cleaned_segments.append({**seg, "body": body, "cleaned_char_count": len(body)})
 
-    # 4. Build LLM input
     t3 = time.time()
     if is_chain:
         parts = []
@@ -696,26 +431,27 @@ def preprocess_email(raw: str) -> dict:
     else:
         llm_input = cleaned_segments[0]["body"] if cleaned_segments else raw
 
+    # FIX #6: truncate emails > 8000 chars before sending to LLM
+    MAX_LLM_CHARS = 8000
+    if len(llm_input) > MAX_LLM_CHARS:
+        original_len = len(llm_input)
+        llm_input = llm_input[:MAX_LLM_CHARS]
+        _log_step("warn", "Input truncated",
+                  detail=f"email exceeded {MAX_LLM_CHARS} char limit",
+                  value=f"{original_len:,} → {MAX_LLM_CHARS:,} chars (cost cap applied)")
+
     stats["total_chars_after"] = len(llm_input)
     reduction_pct = round((stats["total_chars_before"] - stats["total_chars_after"]) / max(stats["total_chars_before"], 1) * 100)
-    _log_step(
-        "ok",
-        "LLM input built",
-        detail=f"chars: {stats['total_chars_before']:,} → {stats['total_chars_after']:,}",
-        value=f"-{reduction_pct}% tokens",
-        duration_ms=int((time.time() - t3) * 1000),
-    )
+    _log_step("ok", "LLM input built",
+              detail=f"chars: {stats['total_chars_before']:,} → {stats['total_chars_after']:,}",
+              value=f"-{reduction_pct}% tokens",
+              duration_ms=int((time.time() - t3) * 1000))
 
-    return {
-        "segments": cleaned_segments,
-        "llm_input": llm_input,
-        "stats": stats,
-        "is_chain": is_chain,
-    }
+    return {"segments": cleaned_segments, "llm_input": llm_input, "stats": stats, "is_chain": is_chain}
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  VALIDATION
+#  VALIDATION  (Fixes #1, #4, #7 applied here)
 # ══════════════════════════════════════════════════════════════════════════════
 
 VALID_CLASSIFICATIONS = {
@@ -737,18 +473,38 @@ REQUIRED_KEYS = {
     "attachment_details"
 }
 
+# FIX #1 + #4: classification-aware mandatory review and missing_fields rules
+CLASSIFICATION_MANDATORY_REVIEW = {
+    "Rate Request": {
+        "fields": ["shipment_mode"],
+        "reason": "Rate Request with missing shipment_mode — cannot price without mode"
+    },
+    "Complaint/Escalation": {
+        "fields": [],
+        "reason": "Complaint/Escalation always requires human review"
+    },
+}
+# FIX #4: fields that must appear in missing_fields per classification when null
+CLASSIFICATION_CRITICAL_FIELDS = {
+    "Rate Request":          ["shipment_mode", "origin", "destination", "incoterms"],
+    "Tracking Request":      ["tracking_numbers"],
+    "Documentation Request": ["documents_requested"],
+    "Complaint/Escalation":  [],
+    "General Enquiry":       [],
+}
 
-def validate_and_repair(result: dict) -> tuple[dict, list[str]]:
+
+def validate_and_repair(result: dict) -> tuple:
     errors = []
     list_defaults = {"tracking_numbers", "documents_requested", "missing_fields", "human_review_reasons"}
     bool_defaults = {"human_review_required", "multiple_shipments_detected", "is_email_chain", "has_attachments_mentioned"}
     for key in REQUIRED_KEYS:
         if key not in result:
-            if key in list_defaults:        result[key] = []
-            elif key in bool_defaults:      result[key] = False
-            elif key == "confidence_scores":result[key] = {}
+            if key in list_defaults:         result[key] = []
+            elif key in bool_defaults:       result[key] = False
+            elif key == "confidence_scores": result[key] = {}
             elif key == "overall_confidence":result[key] = 0.0
-            else:                           result[key] = None
+            else:                            result[key] = None
             errors.append(f"Missing key auto-filled: {key}")
 
     if result.get("classification") not in VALID_CLASSIFICATIONS:
@@ -778,6 +534,7 @@ def validate_and_repair(result: dict) -> tuple[dict, list[str]]:
             errors.append(f"Confidence non-zero for null field '{field}' — corrected to 0")
             scores[field] = 0.0
 
+    # Recalculate overall_confidence from all 8 fields
     all_scores = [scores.get(f, 0.0) for f in EXTRACTABLE_FIELDS]
     result["overall_confidence"] = round(sum(all_scores) / len(all_scores), 3)
 
@@ -789,6 +546,50 @@ def validate_and_repair(result: dict) -> tuple[dict, list[str]]:
     for bf in ["human_review_required", "multiple_shipments_detected", "is_email_chain", "has_attachments_mentioned"]:
         if not isinstance(result.get(bf), bool):
             result[bf] = bool(result.get(bf))
+
+    # FIX #4: classification-aware missing_fields population
+    classification = result.get("classification", "General Enquiry")
+    critical = CLASSIFICATION_CRITICAL_FIELDS.get(classification, [])
+    for field in critical:
+        if field == "tracking_numbers":
+            if not result.get("tracking_numbers") and field not in result.get("missing_fields", []):
+                result.setdefault("missing_fields", []).append(field)
+                errors.append(f"Classification-aware: {field} added to missing_fields for {classification}")
+        elif field == "documents_requested":
+            if not result.get("documents_requested") and field not in result.get("missing_fields", []):
+                result.setdefault("missing_fields", []).append(field)
+                errors.append(f"Classification-aware: {field} added to missing_fields for {classification}")
+        else:
+            if result.get(field) is None and field not in result.get("missing_fields", []):
+                result.setdefault("missing_fields", []).append(field)
+                errors.append(f"Classification-aware: {field} added to missing_fields for {classification}")
+
+    # FIX #1: classification-specific mandatory review rules
+    mandatory_rule = CLASSIFICATION_MANDATORY_REVIEW.get(classification)
+    if mandatory_rule:
+        # Always flag Complaints
+        if not mandatory_rule["fields"]:
+            result["human_review_required"] = True
+            reason = mandatory_rule["reason"]
+            if reason not in result.get("human_review_reasons", []):
+                result.setdefault("human_review_reasons", []).append(reason)
+        else:
+            # Flag if any critical field for this classification is null
+            for field in mandatory_rule["fields"]:
+                if result.get(field) is None:
+                    result["human_review_required"] = True
+                    reason = mandatory_rule["reason"]
+                    if reason not in result.get("human_review_reasons", []):
+                        result.setdefault("human_review_reasons", []).append(reason)
+                    errors.append(f"Mandatory review: {classification} has null {field}")
+
+    # FIX #7: attachment mentioned → always add review reason
+    if result.get("has_attachments_mentioned"):
+        attachment_reason = "Attachment mentioned — verify document receipt"
+        if attachment_reason not in result.get("human_review_reasons", []):
+            result.setdefault("human_review_reasons", []).append(attachment_reason)
+            result["human_review_required"] = True
+            errors.append("Attachment flag: review reason added")
 
     if errors:
         result["human_review_required"] = True
@@ -837,14 +638,9 @@ Return this exact JSON schema (no markdown, no preamble, no trailing text):
   "documents_requested": ["<list of document types, or empty list>"],
   "missing_fields": ["<field names that are missing but critical for this enquiry type>"],
   "confidence_scores": {
-    "customer_name": <0.0-1.0>,
-    "origin": <0.0-1.0>,
-    "destination": <0.0-1.0>,
-    "cargo_description": <0.0-1.0>,
-    "weight": <0.0-1.0>,
-    "volume": <0.0-1.0>,
-    "shipment_mode": <0.0-1.0>,
-    "incoterms": <0.0-1.0>
+    "customer_name": <0.0-1.0>, "origin": <0.0-1.0>, "destination": <0.0-1.0>,
+    "cargo_description": <0.0-1.0>, "weight": <0.0-1.0>, "volume": <0.0-1.0>,
+    "shipment_mode": <0.0-1.0>, "incoterms": <0.0-1.0>
   },
   "overall_confidence": <0.0-1.0>,
   "human_review_required": <true|false>,
@@ -872,8 +668,7 @@ def _do_llm_call(llm_input: str, api_key: str) -> dict:
     resp = req.post(
         "https://api.groq.com/openai/v1/chat/completions",
         headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"},
-        json=payload,
-        timeout=30,
+        json=payload, timeout=30,
     )
     resp.raise_for_status()
     data = resp.json()
@@ -885,7 +680,7 @@ def _do_llm_call(llm_input: str, api_key: str) -> dict:
     return json.loads(raw)
 
 
-def call_llm_with_retry(llm_input: str, api_key: str, max_retries: int = 3) -> tuple[dict, list[str]]:
+def call_llm_with_retry(llm_input: str, api_key: str, max_retries: int = 3) -> tuple:
     last_error = None
     for attempt in range(max_retries):
         t_llm = time.time()
@@ -894,8 +689,7 @@ def call_llm_with_retry(llm_input: str, api_key: str, max_retries: int = 3) -> t
                       value="llama-3.3-70b-versatile")
             raw_result = _do_llm_call(llm_input, api_key)
             llm_ms = int((time.time() - t_llm) * 1000)
-            _log_step("ok", "LLM response", detail="JSON received and parsed",
-                      duration_ms=llm_ms)
+            _log_step("ok", "LLM response", detail="JSON received and parsed", duration_ms=llm_ms)
 
             t_val = time.time()
             validated, errors = validate_and_repair(raw_result)
@@ -907,20 +701,19 @@ def call_llm_with_retry(llm_input: str, api_key: str, max_retries: int = 3) -> t
                           value=errors[0][:60] if errors else "",
                           duration_ms=val_ms)
             else:
-                _log_step("ok", "Validation", detail="all fields passed",
-                          duration_ms=val_ms)
+                _log_step("ok", "Validation", detail="all fields passed", duration_ms=val_ms)
 
             return validated, errors
 
         except json.JSONDecodeError as e:
             last_error = f"JSON parse error (attempt {attempt+1}): {e}"
-            _log_step("err", f"JSON parse", detail=str(e)[:80],
+            _log_step("err", "JSON parse", detail=str(e)[:80],
                       duration_ms=int((time.time() - t_llm) * 1000))
             if attempt < max_retries - 1:
                 time.sleep(2 ** attempt)
         except Exception as e:
             last_error = f"API error (attempt {attempt+1}): {e}"
-            _log_step("err", f"API error", detail=str(e)[:80],
+            _log_step("err", "API error", detail=str(e)[:80],
                       duration_ms=int((time.time() - t_llm) * 1000))
             if attempt < max_retries - 1:
                 _log_step("info", "Retry backoff", detail=f"waiting {2**attempt}s before retry {attempt+2}")
@@ -972,6 +765,7 @@ def connect_outlook(client_id: str):
         if "access_token" in result:
             st.session_state.access_token = result["access_token"]
             st.session_state.outlook_connected = True
+            st.session_state.outlook_connect_failed = False
             return True, "Connected!"
         return False, result.get("error_description", "Auth failed")
     except Exception as e:
@@ -979,12 +773,13 @@ def connect_outlook(client_id: str):
 
 
 def auto_connect_outlook():
+    """FIX #3: returns (success, error_message) instead of bare bool."""
     try:
         import requests as req
         client_id     = st.secrets.get("AZURE_CLIENT_ID", "")
         refresh_token = st.secrets.get("REFRESH_TOKEN", "")
         if not client_id or not refresh_token:
-            return False
+            return False, None   # Not configured — silent
         resp = req.post(
             "https://login.microsoftonline.com/common/oauth2/v2.0/token",
             data={"client_id": client_id, "grant_type": "refresh_token",
@@ -995,10 +790,12 @@ def auto_connect_outlook():
         if "access_token" in data:
             st.session_state.access_token = data["access_token"]
             st.session_state.outlook_connected = True
-            return True
-        return False
-    except Exception:
-        return False
+            st.session_state.outlook_connect_failed = False
+            return True, None
+        err = data.get("error_description", data.get("error", "Token refresh failed"))
+        return False, err
+    except Exception as e:
+        return False, str(e)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1006,11 +803,11 @@ def auto_connect_outlook():
 # ══════════════════════════════════════════════════════════════════════════════
 
 BADGE_MAP = {
-    "Rate Request":         ("badge-rate",      "💰"),
-    "Tracking Request":     ("badge-tracking",   "📍"),
-    "Documentation Request":("badge-docs",       "📄"),
-    "Complaint/Escalation": ("badge-complaint",  "🚨"),
-    "General Enquiry":      ("badge-general",    "💬"),
+    "Rate Request":          ("badge-rate",      "💰"),
+    "Tracking Request":      ("badge-tracking",  "📍"),
+    "Documentation Request": ("badge-docs",      "📄"),
+    "Complaint/Escalation":  ("badge-complaint", "🚨"),
+    "General Enquiry":       ("badge-general",   "💬"),
 }
 
 
@@ -1020,34 +817,19 @@ def badge_html(classification: str) -> str:
 
 
 def confidence_ring_svg(score: float, size: int = 56) -> str:
-    pct = round(score * 100)
-    if score >= 0.75: color = "#22c55e"
-    elif score >= 0.5: color = "#f59e0b"
-    else: color = "#ef4444"
-    r = 22
-    circ = 2 * 3.14159 * r
-    dash = circ * score
-    return f"""
-    <svg width="{size}" height="{size}" viewBox="0 0 56 56">
+    pct   = round(score * 100)
+    color = "#22c55e" if score >= 0.75 else "#f59e0b" if score >= 0.5 else "#ef4444"
+    r     = 22
+    circ  = 2 * 3.14159 * r
+    dash  = circ * score
+    return f"""<svg width="{size}" height="{size}" viewBox="0 0 56 56">
       <circle cx="28" cy="28" r="{r}" fill="none" stroke="#e5e7eb" stroke-width="5"/>
       <circle cx="28" cy="28" r="{r}" fill="none" stroke="{color}" stroke-width="5"
               stroke-dasharray="{dash:.1f} {circ:.1f}"
-              stroke-dashoffset="{circ/4:.1f}"
-              stroke-linecap="round"/>
+              stroke-dashoffset="{circ/4:.1f}" stroke-linecap="round"/>
       <text x="28" y="33" text-anchor="middle" font-size="12" font-weight="700"
             fill="{color}" font-family="IBM Plex Sans,sans-serif">{pct}%</text>
     </svg>"""
-
-
-def mini_bar(score: float) -> str:
-    pct = int(score * 100)
-    color = "#22c55e" if score >= 0.75 else "#f59e0b" if score >= 0.5 else "#ef4444"
-    return (
-        f'<div class="conf-bar-bg">'
-        f'<div class="conf-bar-fill" style="width:{pct}%;background:{color}"></div>'
-        f'</div>'
-        f'<div style="font-size:10px;color:#9ca3af;margin-top:2px">{pct}%</div>'
-    )
 
 
 def render_field_rows(result: dict):
@@ -1115,15 +897,9 @@ def chain_preview_html(segments: list) -> str:
     html = '<div style="margin-bottom:10px">'
     for seg in segments:
         if seg["is_latest"]:
-            html += f"""<div class="chain-latest">
-                <div class="chain-label chain-label-latest">▶ Latest Email</div>
-                <div>{seg["body"][:300].replace(chr(10),"<br>")}{"…" if len(seg["body"])>300 else ""}</div>
-            </div>"""
+            html += f'<div class="chain-latest"><div class="chain-label chain-label-latest">▶ Latest Email</div><div>{seg["body"][:300].replace(chr(10),"<br>")}{"…" if len(seg["body"])>300 else ""}</div></div>'
         else:
-            html += f"""<div class="chain-older">
-                <div class="chain-label chain-label-older">Earlier Email {seg["position"]}</div>
-                <div>{seg["body"][:150].replace(chr(10),"<br>")}{"…" if len(seg["body"])>150 else ""}</div>
-            </div>"""
+            html += f'<div class="chain-older"><div class="chain-label chain-label-older">Earlier Email {seg["position"]}</div><div>{seg["body"][:150].replace(chr(10),"<br>")}{"…" if len(seg["body"])>150 else ""}</div></div>'
     html += "</div>"
     return html
 
@@ -1150,8 +926,7 @@ We are looking for air freight rates for the following shipment:
 Please confirm if you handle express air and provide your best rates.
 
 Regards,
-Priya Sharma | Export House India | GSTIN: 27AAACG1234P1Z5 | www.exporthouse.in
-This email and any attachments are confidential. If received in error please delete immediately.""",
+Priya Sharma | Export House India | GSTIN: 27AAACG1234P1Z5 | www.exporthouse.in""",
 
     "Tracking Request – Multiple Numbers": """Hi,
 
@@ -1164,8 +939,7 @@ TRK-9930-IN
 All three were dispatched from Delhi to Dubai last week. We haven't received any status updates yet. Please advise urgently.
 
 Best,
-Rahul Mehta
-Ops Team""",
+Rahul Mehta""",
 
     "Documentation Request – BOL + Invoice": """Dear Hermes Team,
 
@@ -1178,7 +952,7 @@ Please share these on priority as our consignee in Rotterdam needs them for cust
 
 Thank you,
 Ananya Verma
-Global Logistics Pvt Ltd | GSTIN: 27AAACG1234P1Z5 | www.globallogistics.in""",
+Global Logistics Pvt Ltd""",
 
     "Complaint / Escalation": """Subject: URGENT – Damaged cargo received
 
@@ -1187,8 +961,6 @@ Hello,
 We received our shipment (AWB: 123-45678901) today at our Chennai warehouse and found significant damage to 12 cartons of pharmaceutical goods. The packaging was visibly torn and there was evidence of moisture damage.
 
 This is completely unacceptable. We need an immediate investigation and claim form. Our client is demanding compensation.
-
-This needs to be escalated to your senior management immediately.
 
 Sanjay Nair
 Director – Supply Chain | MedExport India""",
@@ -1206,16 +978,13 @@ Priya
 
 ------- Original Message -------
 From: ops@hermescargo.com
-Sent: Monday, 10 June
 
 Could you confirm the weight and volume for your Mumbai-Frankfurt shipment?
 
 ------- Original Message -------
 From: priya.sharma@exporthouse.in
-Sent: Sunday, 9 June
 
 Dear Team,
-
 We need air freight rates for:
 - Origin: Mumbai
 - Destination: Frankfurt
@@ -1261,16 +1030,22 @@ Deepak Iyer""",
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  AUTO-CONNECT OUTLOOK
+#  AUTO-CONNECT OUTLOOK  (FIX #3: show warning if fails)
 # ══════════════════════════════════════════════════════════════════════════════
 
 if not st.session_state.outlook_connected:
-    if auto_connect_outlook():
+    ok, err = auto_connect_outlook()
+    if ok:
         try:
             emails = fetch_outlook_emails(st.session_state.access_token, top=5)
             st.session_state["outlook_emails"] = emails
         except Exception:
             pass
+    elif err:
+        # Token was configured but failed — surface this in the sidebar
+        st.session_state.outlook_connect_failed = True
+        st.session_state["outlook_connect_error"] = err
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  SIDEBAR
@@ -1281,12 +1056,18 @@ with st.sidebar:
     st.markdown("**Shipment Extraction Assistant**")
     st.markdown("---")
 
-    st.markdown("### 📥 Email Source")
-    source = st.radio(
-        "source", ["Paste Email", "Outlook (Microsoft 365)", "Sample Emails"],
-        label_visibility="collapsed"
-    )
+    # FIX #3: show Outlook auto-connect failure warning
+    if st.session_state.get("outlook_connect_failed"):
+        err_msg = st.session_state.get("outlook_connect_error", "Unknown error")
+        st.markdown(
+            f'<div class="outlook-warn">⚠️ <strong>Outlook auto-connect failed</strong><br>'
+            f'<span style="font-size:11px">{err_msg[:120]}</span><br>'
+            f'<span style="font-size:11px;color:#fbbf24">Please reconnect manually below.</span></div>',
+            unsafe_allow_html=True)
 
+    st.markdown("### 📥 Email Source")
+    source = st.radio("source", ["Paste Email", "Outlook (Microsoft 365)", "Sample Emails"],
+                      label_visibility="collapsed")
     st.markdown("---")
 
     if source == "Outlook (Microsoft 365)":
@@ -1296,7 +1077,11 @@ with st.sidebar:
             if client_id:
                 with st.spinner("Opening browser login…"):
                     ok, msg = connect_outlook(client_id)
-                st.success(msg) if ok else st.error(msg)
+                if ok:
+                    st.success(msg)
+                    st.session_state.outlook_connect_failed = False
+                else:
+                    st.error(msg)
             else:
                 st.warning("AZURE_CLIENT_ID not set in secrets.")
 
@@ -1306,9 +1091,20 @@ with st.sidebar:
             if st.button("📬 Fetch Emails", use_container_width=True):
                 with st.spinner("Fetching…"):
                     try:
-                        emails = fetch_outlook_emails(st.session_state.access_token, top=n_emails)
-                        st.session_state["outlook_emails"] = emails
-                        st.success(f"Fetched {len(emails)} emails")
+                        new_emails = fetch_outlook_emails(st.session_state.access_token, top=n_emails)
+                        # FIX #8: deduplicate by email ID before storing
+                        existing = st.session_state.get("outlook_emails", [])
+                        existing_ids = st.session_state.get("outlook_email_ids", set())
+                        added = 0
+                        for e in new_emails:
+                            eid = e.get("id", "")
+                            if eid not in existing_ids:
+                                existing.append(e)
+                                existing_ids.add(eid)
+                                added += 1
+                        st.session_state["outlook_emails"] = existing
+                        st.session_state["outlook_email_ids"] = existing_ids
+                        st.success(f"Fetched {added} new email(s) ({len(new_emails) - added} duplicate(s) skipped)")
                     except Exception as e:
                         st.error(f"Error: {e}")
 
@@ -1342,28 +1138,20 @@ st.markdown("---")
 col_in, col_out = st.columns([1, 1], gap="large")
 
 
-# ── Helper: run full pipeline ─────────────────────────────────────────────────
 def run_extraction(raw_email: str, api_key: str, threshold: float, source_label: str = "manual"):
     t_total = time.time()
-
-    # ── Begin log run ──────────────────────────────────────────────────
     email_hash = _start_log_run(raw_email, source_label)
 
-    # ── PREPROCESS ────────────────────────────────────────────────────
     _log_step("info", "── Preprocessing ──")
     preproc = preprocess_email(raw_email)
     st.session_state.preprocessed_text = preproc["llm_input"]
     st.session_state.chain_segments    = preproc["segments"]
     st.session_state.preproc_stats     = preproc["stats"]
 
-    # ── LLM + VALIDATION ──────────────────────────────────────────────
     _log_step("info", "── LLM Extraction ──")
     result, val_errors = call_llm_with_retry(preproc["llm_input"], api_key)
-
-    # Override is_email_chain from our own detection
     result["is_email_chain"] = preproc["is_chain"]
 
-    # ── THRESHOLD CHECK ────────────────────────────────────────────────
     t_thresh = time.time()
     if result.get("overall_confidence", 1.0) < threshold:
         result["human_review_required"] = True
@@ -1380,12 +1168,13 @@ def run_extraction(raw_email: str, api_key: str, threshold: float, source_label:
                   value="→ auto-processable",
                   duration_ms=int((time.time() - t_thresh) * 1000))
 
-    # ── SUPABASE LOGGING ───────────────────────────────────────────────
+    # FIX #5: persist log to hermes_logs.jsonl on disk
     _log_step("info", "── Persistence ──")
-    t_sb = time.time()
+    t_persist = time.time()
     log_entry = {
         "timestamp":          datetime.utcnow().isoformat(),
         "email_hash":         hashlib.md5(raw_email.encode()).hexdigest(),
+        "source_label":       source_label,
         "classification":     result.get("classification"),
         "overall_confidence": round(result.get("overall_confidence", 0), 3),
         "human_review":       result.get("human_review_required"),
@@ -1397,23 +1186,31 @@ def run_extraction(raw_email: str, api_key: str, threshold: float, source_label:
         "noise_removed":      preproc["stats"].get("noise_items_removed", 0),
     }
     try:
+        with open("hermes_logs.jsonl", "a") as f:
+            f.write(json.dumps(log_entry) + "\n")
+        _log_step("ok", "File log",
+                  detail="appended to hermes_logs.jsonl",
+                  value=f"hash={email_hash}",
+                  duration_ms=int((time.time() - t_persist) * 1000))
+    except Exception as e:
+        _log_step("warn", "File log", detail=f"write failed: {str(e)[:60]}",
+                  duration_ms=int((time.time() - t_persist) * 1000))
+
+    t_sb = time.time()
+    try:
         from supabase import create_client
         sb = create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
         sb.table("extraction_logs").insert(log_entry).execute()
-        _log_step("ok", "Supabase write",
-                  detail="extraction_logs row inserted",
+        _log_step("ok", "Supabase write", detail="extraction_logs row inserted",
                   value=f"hash={email_hash}",
                   duration_ms=int((time.time() - t_sb) * 1000))
     except KeyError:
-        _log_step("warn", "Supabase write",
-                  detail="SUPABASE_URL/KEY not in secrets — skipped",
+        _log_step("warn", "Supabase write", detail="SUPABASE_URL/KEY not in secrets — skipped",
                   duration_ms=int((time.time() - t_sb) * 1000))
     except Exception as e:
-        _log_step("err", "Supabase write",
-                  detail=str(e)[:80],
+        _log_step("err", "Supabase write", detail=str(e)[:80],
                   duration_ms=int((time.time() - t_sb) * 1000))
 
-    # ── SESSION HISTORY ────────────────────────────────────────────────
     st.session_state.result = result
     st.session_state.email_text = raw_email
     st.session_state.validation_errors = val_errors
@@ -1424,10 +1221,10 @@ def run_extraction(raw_email: str, api_key: str, threshold: float, source_label:
     })
     _log_step("ok", "Session history", detail="record appended to session")
 
-    # ── CLOSE LOG RUN ──────────────────────────────────────────────────
     total_ms = int((time.time() - t_total) * 1000)
     _finish_log_run(
         email_hash=email_hash,
+        source_label=source_label,
         classification=result.get("classification", "?"),
         confidence=result.get("overall_confidence", 0),
         needs_review=result.get("human_review_required", False),
@@ -1441,9 +1238,11 @@ with col_in:
     st.markdown("### 📧 Email Input")
 
     if source == "Paste Email":
-        email_input   = st.text_area("Email body", height=280, placeholder="Paste full email here including any quoted chain…", label_visibility="collapsed")
-        subject_input = st.text_input("Subject (optional)", placeholder="Re: Rate Enquiry – Mumbai to Frankfurt")
-
+        email_input   = st.text_area("Email body", height=280,
+                                     placeholder="Paste full email here including any quoted chain…",
+                                     label_visibility="collapsed")
+        subject_input = st.text_input("Subject (optional)",
+                                      placeholder="Re: Rate Enquiry – Mumbai to Frankfurt")
         if st.button("⚡ Extract Shipment Info", type="primary", use_container_width=True):
             if not grok_api_key:
                 st.warning("GROK_API_KEY not set in Streamlit secrets.")
@@ -1457,8 +1256,8 @@ with col_in:
     elif source == "Sample Emails":
         selected    = st.selectbox("Choose a sample", list(SAMPLE_EMAILS.keys()))
         sample_text = SAMPLE_EMAILS[selected]
-        st.markdown('<div class="email-box">' + sample_text.replace("\n", "<br>") + '</div>', unsafe_allow_html=True)
-
+        st.markdown('<div class="email-box">' + sample_text.replace("\n", "<br>") + '</div>',
+                    unsafe_allow_html=True)
         if st.button("⚡ Extract from Sample", type="primary", use_container_width=True):
             if not grok_api_key:
                 st.warning("GROK_API_KEY not set in Streamlit secrets.")
@@ -1479,7 +1278,6 @@ with col_in:
             chosen_label = st.selectbox("Select an email", list(options.keys()))
             idx       = options[chosen_label]
             email_obj = outlook_emails[idx]
-
             body       = email_obj.get("body", {}).get("content", email_obj.get("bodyPreview", ""))
             full_email = (
                 f"Subject: {email_obj.get('subject','')}\n"
@@ -1488,32 +1286,30 @@ with col_in:
             )
             preview = re.sub(r"<[^>]+>", " ", body)
             preview = re.sub(r"\s+", " ", preview).strip()
-            st.markdown('<div class="email-box">' + preview[:500].replace("\n","<br>") + "…</div>", unsafe_allow_html=True)
-
+            st.markdown('<div class="email-box">' + preview[:500].replace("\n","<br>") + "…</div>",
+                        unsafe_allow_html=True)
             if st.button("⚡ Extract", type="primary", use_container_width=True):
                 if not grok_api_key:
                     st.warning("GROK_API_KEY not set in Streamlit secrets.")
                 else:
                     with st.spinner("Preprocessing + extracting…"):
+                        subject = email_obj.get('subject', '')[:50]
                         run_extraction(full_email, grok_api_key, confidence_threshold,
-                                       source_label=f"outlook:{email_obj.get('subject','')[:30]}")
+                                       source_label=f"outlook:{subject}")
 
-    # ── Preprocessing details panel ───────────────────────────────────────────
     if show_preproc and st.session_state.preproc_stats:
         st.markdown("---")
         st.markdown("**🔧 Preprocessing**")
         st.markdown(preproc_stats_html(st.session_state.preproc_stats), unsafe_allow_html=True)
-
         segments = st.session_state.chain_segments
         if len(segments) > 1:
             st.markdown("")
             with st.expander(f"📧 Chain Preview — {len(segments)} emails detected", expanded=False):
                 st.markdown(chain_preview_html(segments), unsafe_allow_html=True)
-
         with st.expander("🔍 Text sent to LLM", expanded=False):
-            st.markdown('<div class="email-box">' + st.session_state.preprocessed_text.replace("\n","<br>") + '</div>', unsafe_allow_html=True)
+            st.markdown('<div class="email-box">' + st.session_state.preprocessed_text.replace("\n","<br>") + '</div>',
+                        unsafe_allow_html=True)
 
-    # ── Validation errors (dev info) ──────────────────────────────────────────
     if st.session_state.validation_errors:
         with st.expander(f"⚠️ {len(st.session_state.validation_errors)} validation correction(s)", expanded=False):
             for err in st.session_state.validation_errors:
@@ -1535,11 +1331,11 @@ with col_out:
         """, unsafe_allow_html=True)
     else:
         oc = result.get("overall_confidence", 0)
-
         top_left, top_right = st.columns([3, 1])
         with top_left:
             st.markdown(badge_html(result.get("classification", "General Enquiry")), unsafe_allow_html=True)
-            st.markdown(f'<div style="font-size:12.5px;color:#6b7280;margin-top:8px;line-height:1.5">{result.get("email_intent_summary","")}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="font-size:12.5px;color:#6b7280;margin-top:8px;line-height:1.5">{result.get("email_intent_summary","")}</div>',
+                        unsafe_allow_html=True)
         with top_right:
             st.markdown(
                 f'<div style="text-align:center">{confidence_ring_svg(oc)}'
@@ -1547,7 +1343,6 @@ with col_out:
                 unsafe_allow_html=True)
 
         st.markdown("")
-
         if result.get("human_review_required"):
             reasons_html = "".join(f"<li>{r}</li>" for r in result.get("human_review_reasons", []))
             st.markdown(
@@ -1560,7 +1355,6 @@ with col_out:
                 unsafe_allow_html=True)
 
         st.markdown("")
-
         missing = result.get("missing_fields", [])
         if missing:
             pills = "".join(f'<span class="pill-missing">⚠ {f}</span>' for f in missing)
@@ -1569,7 +1363,7 @@ with col_out:
                 unsafe_allow_html=True)
 
         flags = []
-        if result.get("is_email_chain"):             flags.append("📧 Email Chain")
+        if result.get("is_email_chain"):              flags.append("📧 Email Chain")
         if result.get("multiple_shipments_detected"): flags.append("📦 Multiple Shipments")
         if result.get("has_attachments_mentioned"):   flags.append("📎 Attachments Mentioned")
         if flags:
@@ -1606,13 +1400,12 @@ with col_out:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  PROCESSING LOG PANEL  ← NEW
+#  PROCESSING LOG PANEL
 # ══════════════════════════════════════════════════════════════════════════════
 
 st.markdown("---")
 st.markdown("### 🖥️ Processing Log")
 st.caption("Step-by-step trace of every pipeline run — preprocessing, LLM calls, validation, and persistence.")
-
 render_proc_log()
 
 
